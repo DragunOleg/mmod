@@ -17,6 +17,7 @@ dependencies {
     //plotting libs
     implementation("org.jetbrains.lets-plot:lets-plot-batik:2.4.0")
     implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.0.0")
+    implementation("org.apache.commons:commons-math3:3.6.1")
 
 }
 

@@ -1,12 +1,10 @@
-package plotting
+package kr_one
 
-import jetbrains.datalore.base.registration.Disposable
-import jetbrains.datalore.plot.MonolithicCommon
-import jetbrains.datalore.vis.swing.batik.DefaultPlotPanelBatik
+import org.apache.commons.math3.distribution.WeibullDistribution
+import org.apache.commons.math3.random.JDKRandomGenerator
+import org.apache.commons.math3.random.RandomGenerator
 import org.jetbrains.letsPlot.geom.geomDensity
 import org.jetbrains.letsPlot.geom.geomHistogram
-import org.jetbrains.letsPlot.intern.Plot
-import org.jetbrains.letsPlot.intern.toSpec
 import org.jetbrains.letsPlot.letsPlot
 import java.awt.Dimension
 import java.awt.GridLayout
@@ -14,14 +12,18 @@ import javax.swing.*
 import javax.swing.WindowConstants.EXIT_ON_CLOSE
 
 /**
- * Example from here https://github.com/JetBrains/lets-plot-kotlin/blob/master/demo/jvm-batik/src/main/kotlin/minimalDemo/Main.kt
+ * try to build weibull distribution without kt-numpy
  */
+
 fun main() {
 
-    val rand = java.util.Random()
-    val n = 200
-    val data = mapOf<String, Any>(
-        "x" to List(n) { rand.nextGaussian() }
+    val rg: RandomGenerator = JDKRandomGenerator()
+    val g = WeibullDistribution(rg, 10.0, 3.0, WeibullDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY)
+
+    val n = 100
+
+    val data = mapOf<String, Any> (
+        "x" to List(n) { g.sample() }
     )
 
     val plots = mapOf(
@@ -41,7 +43,7 @@ fun main() {
         )
 
     val selectedPlotKey = plots.keys.first()
-    val controller = Controller(
+    val controller = plotting.Controller(
         plots,
         selectedPlotKey,
         false
@@ -106,56 +108,5 @@ fun main() {
         window.size = Dimension(850, 400)
         window.setLocationRelativeTo(null)
         window.isVisible = true
-    }
-}
-
-class Controller(
-    private val plots: Map<String, Plot>,
-    initialPlotKey: String,
-    initialPreserveAspectRadio: Boolean
-) {
-    var plotContainerPanel: JPanel? = null
-    var plotKey: String = initialPlotKey
-        set(value) {
-            field = value
-            rebuildPlotComponent()
-        }
-    var preserveAspectRadio: Boolean = initialPreserveAspectRadio
-        set(value) {
-            field = value
-            rebuildPlotComponent()
-        }
-
-    fun rebuildPlotComponent() {
-        plotContainerPanel?.let {
-            val container = plotContainerPanel!!
-            // cleanup
-            for (component in container.components) {
-                if (component is Disposable) {
-                    component.dispose()
-                }
-            }
-            container.removeAll()
-
-            // build
-            container.add(createPlotPanel())
-            container.revalidate()
-        }
-    }
-
-    fun createPlotPanel(): JPanel {
-        val rawSpec = plots[plotKey]!!.toSpec()
-        val processedSpec = MonolithicCommon.processRawSpecs(rawSpec, frontendOnly = false)
-
-        return DefaultPlotPanelBatik(
-            processedSpec = processedSpec,
-            preserveAspectRatio = preserveAspectRadio,
-            preferredSizeFromPlot = false,
-            repaintDelay = 10,
-        ) { messages ->
-            for (message in messages) {
-                println("[Example App] $message")
-            }
-        }
     }
 }
