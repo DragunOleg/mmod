@@ -1,33 +1,51 @@
 package kr_one
 
 fun main() {
-    val randomEventGenerator = RandomEventGenerator()
+    val randomEventGenerator = RandomEventGenerator(isRealRandom = true, isDebug = true)
     val Pa = 0.45
-    randomEventGenerator(Pa)
+    val result = randomEventGenerator(Pa)
 }
 
-class RandomEventGenerator {
+/**
+ * @param isRealRandom: true if you want real random. False if you want repeatable pseudoRandom
+ * @param isDebug: should println results or not
+ */
+class RandomEventGenerator(
+    private val isRealRandom: Boolean,
+    private val isDebug: Boolean
+) {
     private val realRandom = java.util.Random()
     private val pseudoRandom = kotlin.random.Random(10)
 
-    fun realRandomNext() = realRandom.nextDouble()
-    fun pseudoRandomNext() = pseudoRandom.nextDouble()
+    private fun realRandomNext() = realRandom.nextDouble()
+    private fun pseudoRandomNext() = pseudoRandom.nextDouble()
+
+    operator fun invoke(Pa: Double): Result {
+        val randomNumberX = if (isRealRandom) realRandomNext() else pseudoRandomNext()
+        val result = randomNumberX <= Pa
+
+        if (isDebug) {
+            println(
+                "x = $randomNumberX \n" +
+                        "Pa = $Pa"
+            )
+            if (result) {
+                println("Event happened")
+            } else {
+                println("Event didn't happened")
+            }
+        }
+
+        return Result(result = randomNumberX <= Pa, Pa = Pa, randomNumber = randomNumberX)
+    }
 
     /**
-     * Return true, if event A triggered
+     * @param result is true, if event happened
      */
-    operator fun invoke(Pa: Double): Boolean {
-        val randomNumberX = realRandomNext()
-        //val randomNumberX = pseudoRandomNext()
-        val result = randomNumberX <= Pa
-        println("x = $randomNumberX \n" +
-                "Pa = $Pa")
-        if (result) {
-            println("Event A happened")
-        } else {
-            println("Event A didn't happened")
-        }
-        return randomNumberX <= Pa
-    }
+    data class Result(
+        val result: Boolean,
+        val Pa: Double,
+        val randomNumber: Double
+    )
 }
 
