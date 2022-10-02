@@ -3,7 +3,7 @@ package kr_one
 fun main() {
     val randomEventGenerator = RandomEventGenerator(isRealRandom = true, isDebug = true)
     val Pa = 0.45
-    val result = randomEventGenerator(Pa)
+    randomEventGenerator.invoke(Pa)
 }
 
 /**
@@ -20,6 +20,10 @@ class RandomEventGenerator(
     private fun realRandomNext() = realRandom.nextDouble()
     private fun pseudoRandomNext() = pseudoRandom.nextDouble()
 
+    /**
+     * Returning true/false if event happened, gained probability and generated x
+     * @see Result
+     */
     operator fun invoke(Pa: Double): Result {
         val randomNumberX = if (isRealRandom) realRandomNext() else pseudoRandomNext()
         val result = randomNumberX <= Pa
@@ -36,11 +40,13 @@ class RandomEventGenerator(
             }
         }
 
-        return Result(result = randomNumberX <= Pa, Pa = Pa, randomNumber = randomNumberX)
+        return Result(result = result, Pa = Pa, randomNumber = randomNumberX)
     }
 
     /**
      * @param result is true, if event happened
+     * @param Pa given probability
+     * @param randomNumber number from >0 & <1
      */
     data class Result(
         val result: Boolean,

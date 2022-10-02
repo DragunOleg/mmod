@@ -4,8 +4,7 @@ fun main() {
     val complexEventGenerator = ComplexEventGenerator(isRealRandom = true, isDebug = true)
     val Pa = 0.45
     val Pb = 0.9
-    val complexEventResult = complexEventGenerator(Pa, Pb)
-
+    complexEventGenerator.invoke(Pa, Pb)
 }
 
 class ComplexEventGenerator(
@@ -14,10 +13,9 @@ class ComplexEventGenerator(
 ) {
     private val randomEventGenerator = RandomEventGenerator(isRealRandom = isRealRandom, isDebug = false)
 
-    // TODO: tests
     operator fun invoke(Pa: Double, Pb: Double): Result {
-        val resultA = randomEventGenerator(Pa)
-        val resultB = randomEventGenerator(Pb)
+        val resultA = randomEventGenerator.invoke(Pa)
+        val resultB = randomEventGenerator.invoke(Pb)
 
         val complexEventResult =
             if (resultA.result) {
