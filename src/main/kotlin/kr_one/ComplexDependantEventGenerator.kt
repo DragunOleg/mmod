@@ -1,13 +1,11 @@
 package kr_one
 
 fun main() {
-    val complexDependantEventGenerator = ComplexDependantEventGenerator(isRealRandom = true, isDebug = true)
-    var Pa = 0.9
-    var Pb = 0.9
-    var PBdependant_A = 0.8
-    repeat(10) {
-        complexDependantEventGenerator.invoke(Pa, Pb, PBdependant_A)
-    }
+    val complexDependantEventGenerator = ComplexDependantEventGenerator(isRealRandom = true, isDebug = false)
+    var Pa = 0.1
+    var Pb = 0.1
+    var PBdependant_A = 0.1
+
 //    repeat(10) { times1 ->
 //        Pa = 0.1 * times1
 //        Pb = 0.0
@@ -21,8 +19,24 @@ fun main() {
 //        }
 //    }
 
+    val resultList = List<ComplexDependantEventGenerator.Result> (100000) {complexDependantEventGenerator.invoke(Pa, Pb, PBdependant_A)}
+    val ABList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.AB>().apply {
+        println("AB size: $size")
+    }
+    val notA_BList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>().apply {
+        println("notA_B size: $size")
+    }
+    val A_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>().apply {
+        println("A_notB size: $size")
+    }
+    val notA_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>().apply {
+        println("notA_notB size: $size")
+    }
+
 }
 
+// TODO: P(B/!A) верно или нет?
+// TODO: Tests
 class ComplexDependantEventGenerator(
     val isRealRandom: Boolean,
     val isDebug: Boolean
@@ -57,20 +71,20 @@ class ComplexDependantEventGenerator(
      * Возьмем за А - событие из RandomEventGenerator.
      * Нам не важно, произошло ли B в аналогичном понимании, будем брать его только для формулы
      * формула полной ветоятности:
-     * P(B)=1=P(B/A)*P(A) +P(B/!A)*P(!A), отсюда
+     * P(B)=P(B/A)*P(A) +P(B/!A)*P(!A), отсюда
      *
-     * 1-P(B/A)*P(A)
+     * P(B)-P(B/A)*P(A)
      * -------------- = P(B/!A)
      *      P(!A)
      *
      */
     private fun calculate_PBdepentant_notA(Pa: Double, Pb: Double, PBdependantA: Double): Double {
         //если невозможно событие !A, то и P(B/!A) невозможно (или = 0)
-        if (Pa == 1.0) return 0.0
+        //if (Pa == 1.0) return 0.0
         //если невозможно событие B, то и зависимые события невозможны
-        if (Pb == 0.0) return 0.0
+        //if (Pb == 0.0) return 0.0
         //вероятность не может быть больше 1.0 и меньше 0.0
-        val PBdependant_notA = (1 - PBdependantA * Pa) / (1.0 - Pa)
+        val PBdependant_notA = (Pb - PBdependantA * Pa) / (1.0 - Pa)
 
         return PBdependant_notA
     }
@@ -107,7 +121,7 @@ class ComplexDependantEventGenerator(
 
         fun debugString(): String {
             return ("Pa = $Pa, Pb = $Pb, PBdependant_A = $PBdependant_A, PBdependant_notA = $PBdependant_notA"
-                    + "\n ${this.javaClass.simpleName} : x1 = $x1, x2 = $x2"
+                    //+ "\n ${this.javaClass.simpleName} : x1 = $x1, x2 = $x2"
                     )
         }
     }

@@ -15,10 +15,11 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     //plotting libs
-    implementation("org.jetbrains.lets-plot:lets-plot-batik:2.4.0")
-    implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.0.0")
+    implementation("org.jetbrains.lets-plot:lets-plot-batik:2.5.0")
+    implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.1.0")
     //testing weibull distribution
     implementation("org.apache.commons:commons-math3:3.6.1")
+    testImplementation("org.slf4j:slf4j-simple:2.0.3")
 
 }
 
