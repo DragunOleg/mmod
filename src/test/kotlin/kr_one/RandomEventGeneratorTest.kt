@@ -37,7 +37,7 @@ internal class RandomEventGeneratorTest {
         val result2List = List<RandomEventGenerator.Result>(100000) { pseudoRandom2.invoke(0.5) }
 
         assertEquals(result1List, result2List)
-        assertEquals(true, result1List.subList(0, 10) == result2List.subList(0, 10))
+        assertEquals(true, result1List.subList(0, 1000) == result2List.subList(0, 1000))
         assertEquals(true, result1List[10000] == result2List[10000])
     }
 }

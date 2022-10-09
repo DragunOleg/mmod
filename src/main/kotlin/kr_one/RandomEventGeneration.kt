@@ -1,6 +1,7 @@
 package kr_one
 
 import org.jetbrains.letsPlot.geom.geomHistogram
+import org.jetbrains.letsPlot.geom.geomVLine
 import org.jetbrains.letsPlot.ggsize
 import org.jetbrains.letsPlot.letsPlot
 
@@ -64,8 +65,20 @@ private fun drawTest() {
     val randomEventGenerator = RandomEventGenerator(isRealRandom = true, isDebug = false)
     val Pa = 0.5
     val data = mapOf<String, List<Double>>(
-        "x" to List(10000) { randomEventGenerator.invoke(Pa).randomNumber }
+        "x" to List(1000000) { randomEventGenerator.invoke(Pa).randomNumber }
     )
     val p = letsPlot(data) { x = "x" } + ggsize(700, 500)
-    (p + geomHistogram(binWidth = 0.01)).show()
+
+    //(p + geomHistogram(binWidth = 0.01)).show()
+
+    (p + geomHistogram(
+        binWidth = 0.05,
+        color = "black",
+        fill = "white"
+    ) + geomVLine(
+        xintercept = (data["x"] as List<Double>).average(),
+        color = "red",
+        linetype = "dashed",
+        size = 3.0
+    )).show()
 }

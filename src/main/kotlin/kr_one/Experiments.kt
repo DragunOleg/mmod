@@ -1,6 +1,6 @@
 package kr_one
 
-import general.Controller
+import plotting_example.Controller
 import org.apache.commons.math3.distribution.WeibullDistribution
 import org.apache.commons.math3.random.JDKRandomGenerator
 import org.apache.commons.math3.random.RandomGenerator

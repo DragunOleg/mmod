@@ -1,4 +1,4 @@
-package general
+package plotting_example
 
 import jetbrains.datalore.base.registration.Disposable
 import jetbrains.datalore.plot.MonolithicCommon

@@ -1,6 +1,5 @@
-package plotting
+package plotting_example
 
-import general.Controller
 import org.jetbrains.letsPlot.geom.geomDensity
 import org.jetbrains.letsPlot.geom.geomHistogram
 import org.jetbrains.letsPlot.letsPlot
