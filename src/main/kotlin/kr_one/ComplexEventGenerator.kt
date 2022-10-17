@@ -67,8 +67,8 @@ class ComplexEventGenerator(
 private fun drawTest() {
     val complexEventGenerator = ComplexEventGenerator(isRealRandom = true, isDebug = false)
     val Pa = 0.5
-    val Pb = 0.8
-    val resultList = List<ComplexEventGenerator.Result>(10) { complexEventGenerator.invoke(Pa, Pb) }
+    val Pb = 0.9
+    val resultList = List<ComplexEventGenerator.Result>(10000) { complexEventGenerator.invoke(Pa, Pb) }
     println("Testing resultList with Pa = $Pa, Pb = $Pb")
     val ABList = resultList.filterIsInstance<ComplexEventGenerator.Result.AB>().apply {
         println("AB size = $size")
@@ -100,10 +100,10 @@ private fun drawTest() {
 
 private fun plotList(list: List<ComplexEventGenerator.Result>): Plot {
     val data = mapOf<String, List<*>>(
-        "x" to list.map { it.x1 },
-        "y" to list.map { it.x2 }
+        "x1" to list.map { it.x1 },
+        "x2" to list.map { it.x2 }
     )
 
-    val p = letsPlot(data) { x = "x"; y = "y" } + ggtitle(list.firstOrNull()?.graphTitle() + " : ${list.size}") //+ ggsize(300,300)
+    val p = letsPlot(data) { x = "x1"; y = "x2" } + ggtitle(list.firstOrNull()?.graphTitle() + " : ${list.size}") //+ ggsize(300,300)
     return (p + geomPoint(shape = 4))
 }
