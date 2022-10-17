@@ -67,7 +67,7 @@ private fun drawTest() {
     val data = mapOf<String, List<Double>>(
         "x" to List(1000000) { randomEventGenerator.invoke(Pa).randomNumber }
     )
-    val p = letsPlot(data) { x = "x" } + ggsize(700, 500)
+    val p = letsPlot(data) { x = "x" } + ggsize(700, 800)
 
     //(p + geomHistogram(binWidth = 0.01)).show()
 
@@ -78,7 +78,6 @@ private fun drawTest() {
     ) + geomVLine(
         xintercept = (data["x"] as List<Double>).average(),
         color = "red",
-        linetype = "dashed",
-        size = 3.0
+        linetype = "dashed"
     )).show()
 }
