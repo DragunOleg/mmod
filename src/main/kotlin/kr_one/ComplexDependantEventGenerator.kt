@@ -240,7 +240,7 @@ private fun invalidDataExample() {
     printResult(resultList)
 
     println("Итерация по всем возможным Pa Pb P(B/A) с действительным рандомом")
-    var resultList2 = mutableListOf<ComplexDependantEventGenerator.Result>()
+    val resultList2 = mutableListOf<ComplexDependantEventGenerator.Result>()
     repeat(10) { times1 ->
         Pa = 0.1 * times1
         Pb = 0.0
@@ -257,19 +257,19 @@ private fun invalidDataExample() {
 }
 
 private fun printResult(result: List<ComplexDependantEventGenerator.Result>) {
-    val ABList = result.filterIsInstance<ComplexDependantEventGenerator.Result.AB>().apply {
+    result.filterIsInstance<ComplexDependantEventGenerator.Result.AB>().apply {
         println("AB size: $size")
     }
-    val notA_BList = result.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>().apply {
+    result.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>().apply {
         println("notA_B size: $size")
     }
-    val A_notBList = result.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>().apply {
+    result.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>().apply {
         println("A_notB size: $size")
     }
-    val notA_notBList = result.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>().apply {
+    result.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>().apply {
         println("notA_notB size: $size")
     }
-    val InvalidDataList = result.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().apply {
+    result.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().apply {
         println("Invalid size: $size")
     }
 }

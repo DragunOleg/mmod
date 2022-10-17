@@ -79,8 +79,8 @@ internal class ComplexDependantEventGeneratorTest {
 
     @Test
     fun testOpenParams() {
-        val Pa = 0.7
-        val Pb = 0.7
+        val Pa = 0.5
+        val Pb = 0.5
         val PBdependantA = 0.5
         val resultList = List<ComplexDependantEventGenerator.Result>(100000) {
             complexDependantEventGenerator.invoke(
@@ -90,19 +90,19 @@ internal class ComplexDependantEventGeneratorTest {
             )
         }
         println("Testing resultList with Pa = $Pa, Pb = $Pb, P(B/A) = $PBdependantA")
-        val ABList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.AB>().apply {
+        resultList.filterIsInstance<ComplexDependantEventGenerator.Result.AB>().apply {
             println("AB size = $size")
         }
-        val notA_BList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>().apply {
+        resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>().apply {
             println("notA_B size = $size")
         }
-        val A_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>().apply {
+        resultList.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>().apply {
             println("A_notB size = $size")
         }
-        val notA_notBLIst = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>().apply {
+        resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>().apply {
             println("notA_notB size = $size")
         }
-        val invalidData = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().apply {
+        resultList.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().apply {
             println("invalid size = $size")
         }
         assertEquals(true, resultList.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().isEmpty())

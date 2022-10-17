@@ -97,7 +97,7 @@ private fun drawExample() {
         (4.0 / 16)
     )
     val possibleEventSublist = group
-        .mapIndexed { index, d ->
+        .mapIndexed { index, _ ->
             index to "A$index"
         }
 

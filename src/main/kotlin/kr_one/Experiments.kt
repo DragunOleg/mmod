@@ -1,6 +1,5 @@
 package kr_one
 
-import org.apache.commons.math3.distribution.LogNormalDistribution
 import plotting_example.Controller
 import org.apache.commons.math3.distribution.WeibullDistribution
 import org.apache.commons.math3.random.JDKRandomGenerator
@@ -77,7 +76,6 @@ fun builtWeibull() {
     val n = 1000
     val rg: RandomGenerator = JDKRandomGenerator()
     val g = WeibullDistribution(rg, 10.0, 3.0, WeibullDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY)
-    val z = LogNormalDistribution(1.0, 2.0)
     val data = mapOf<String, Any>(
         "x" to List(n) { g.sample() }
     )
