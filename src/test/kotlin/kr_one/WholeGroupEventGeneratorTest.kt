@@ -14,7 +14,6 @@ internal class WholeGroupEventGeneratorTest {
         (10.0 / 16)
     )
 
-
     @Test
     fun testBounds() {
         val resultList = List<WholeGroupEventGenerator.Result>(100000) {
@@ -25,5 +24,4 @@ internal class WholeGroupEventGeneratorTest {
         assertEquals(false, resultList.any { it.randomNumber <= 0.0 })
         assertEquals(false, resultList.any { it.randomNumber >= 1.0 })
     }
-
 }
