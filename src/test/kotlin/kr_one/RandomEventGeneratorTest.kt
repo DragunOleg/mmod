@@ -23,6 +23,16 @@ internal class RandomEventGeneratorTest {
         val bounds9 = resultList.filter { it.randomNumber >= 0.8 && it.randomNumber < 0.9 }.apply { println("bounds9 size = ${this.size}") }
         val bounds10 = resultList.filter { it.randomNumber >= 0.9 && it.randomNumber < 1.0 }.apply { println("bounds10 size = ${this.size}") }
 
+        assertEquals(true, bounds1.size in 9001..10999)
+        assertEquals(true, bounds2.size in 9001..10999)
+        assertEquals(true, bounds3.size in 9001..10999)
+        assertEquals(true, bounds4.size in 9001..10999)
+        assertEquals(true, bounds5.size in 9001..10999)
+        assertEquals(true, bounds6.size in 9001..10999)
+        assertEquals(true, bounds7.size in 9001..10999)
+        assertEquals(true, bounds8.size in 9001..10999)
+        assertEquals(true, bounds9.size in 9001..10999)
+        assertEquals(true, bounds10.size in 9001..10999)
     }
 
     @Test
