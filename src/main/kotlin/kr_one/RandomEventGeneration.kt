@@ -6,6 +6,9 @@ import org.jetbrains.letsPlot.ggsize
 import org.jetbrains.letsPlot.letsPlot
 
 fun main() {
+    //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
+    System.setProperty("org.apache.batik.warn_destination", "false")
+
     val randomEventGenerator = RandomEventGenerator(isRealRandom = true, isDebug = true)
     val Pa = 0.45
     randomEventGenerator.invoke(Pa)

@@ -5,6 +5,9 @@ import org.jetbrains.letsPlot.ggsize
 import org.jetbrains.letsPlot.letsPlot
 
 fun main() {
+    //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
+    System.setProperty("org.apache.batik.warn_destination", "false")
+
     val wholeGroupEventGenerator = WholeGroupEventGenerator(isReadRandom = true, isDebug = true)
     val group = listOf<Double>(
         0.0,

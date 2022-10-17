@@ -7,6 +7,9 @@ import org.jetbrains.letsPlot.label.ggtitle
 import org.jetbrains.letsPlot.letsPlot
 
 fun main() {
+    //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
+    System.setProperty("org.apache.batik.warn_destination", "false")
+
     drawExample()
     //invalidDataExample()
 }
