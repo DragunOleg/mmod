@@ -2,7 +2,6 @@ package kr_one
 
 import org.jetbrains.letsPlot.GGBunch
 import org.jetbrains.letsPlot.geom.geomPoint
-import org.jetbrains.letsPlot.ggsize
 import org.jetbrains.letsPlot.intern.Plot
 import org.jetbrains.letsPlot.label.ggtitle
 import org.jetbrains.letsPlot.letsPlot
@@ -13,7 +12,7 @@ fun main() {
     val Pb = 0.9
     complexEventGenerator.invoke(Pa, Pb)
 
-    drawTest()
+    drawExample()
 }
 
 class ComplexEventGenerator(
@@ -64,7 +63,7 @@ class ComplexEventGenerator(
     }
 }
 
-private fun drawTest() {
+private fun drawExample() {
     val complexEventGenerator = ComplexEventGenerator(isRealRandom = true, isDebug = false)
     val Pa = 0.5
     val Pb = 0.9

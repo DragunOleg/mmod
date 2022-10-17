@@ -9,7 +9,7 @@ fun main() {
     val randomEventGenerator = RandomEventGenerator(isRealRandom = true, isDebug = true)
     val Pa = 0.45
     randomEventGenerator.invoke(Pa)
-    drawTest()
+    drawExample()
 }
 
 /**
@@ -61,7 +61,7 @@ class RandomEventGenerator(
     )
 }
 
-private fun drawTest() {
+private fun drawExample() {
     val randomEventGenerator = RandomEventGenerator(isRealRandom = true, isDebug = false)
     val Pa = 0.5
     val data = mapOf<String, List<Double>>(

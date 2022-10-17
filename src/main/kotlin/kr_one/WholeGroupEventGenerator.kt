@@ -17,7 +17,7 @@ fun main() {
     wholeGroupEventGenerator(group, 0.799999)
 
     wholeGroupEventGenerator(group)
-    drawTest()
+    drawExample()
 }
 
 class WholeGroupEventGenerator(
@@ -85,7 +85,7 @@ class WholeGroupEventGenerator(
     }
 }
 
-private fun drawTest() {
+private fun drawExample() {
     val wholeGroupEventGenerator = WholeGroupEventGenerator(isReadRandom = true, isDebug = false)
     val group = listOf<Double>(
         0.0,
