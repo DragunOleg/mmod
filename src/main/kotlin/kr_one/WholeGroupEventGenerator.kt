@@ -104,7 +104,7 @@ private fun drawExample() {
             index to "A$index"
         }
 
-    val list = List(10000) { wholeGroupEventGenerator.invoke(group) }
+    val list = List(16000) { wholeGroupEventGenerator.invoke(group) }
 
     val resultCondList: MutableList<String> = mutableListOf()
     val resultXList: MutableList<Double> = mutableListOf()

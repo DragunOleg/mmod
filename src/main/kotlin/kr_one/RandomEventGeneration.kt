@@ -71,7 +71,7 @@ class RandomEventGenerator(
 private fun drawExample() {
     val randomEventGenerator = RandomEventGenerator(isRealRandom = true, isDebug = false)
     val Pa = 0.5
-    val sizes = listOf(10, 100, 1000, 10000, 100000)
+    val sizes = listOf(5, 20, 100, 1000, 10000)
 
     val bunch = GGBunch()
     sizes.forEachIndexed { index, n ->
@@ -83,17 +83,21 @@ private fun drawExample() {
         data["x"]!!.forEach {
             dxSum += (it - mx).pow(2)
         }
-        //Дисперсия https://wiki.loginom.ru/articles/variance.html
-        val dx = dxSum / n
+        //Несмещенная состоятельная оценка дисперсии
+        val dx = dxSum / (n-1)
 
-        //Среднеквадратическое отклонение https://wiki.loginom.ru/articles/mean-square-deviation.html
+        //Состоятельная оценка среднеквадратичного отклонения
         val sigma = sqrt(dx)
         val p = letsPlot(data) { x = "x" } + ggsize(320, 800) + ggtitle(
-            "Средее для n=  $n:\n" +
+            "Выборочное средее,n=$n:\n" +
                     "$mx\n" +
                     "D[X] = $dx\n" +
                     "σ = $sigma"
         )
+        println("Выборочное средее,n=$n:\n" +
+                "$mx\n" +
+                "D[X] = $dx\n" +
+                "σ = $sigma")
 
         bunch.addPlot(
             p + geomHistogram(
