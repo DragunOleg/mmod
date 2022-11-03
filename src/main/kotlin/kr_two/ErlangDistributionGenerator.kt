@@ -80,14 +80,14 @@ class ErlangDistributionGenerator(
 
 private fun drawGraphs(n: Int, mu: Double) {
 
-    val erlangDistributionGenerator = ErlangDistributionGenerator(isRealRandom = false, isDebug = false)
+    val erlangDistributionGenerator = ErlangDistributionGenerator(isRealRandom = true, isDebug = false)
 
     val theoreticalXFrequency = 0.01
     val listTheoreticalX = List(1500) { it * theoreticalXFrequency }
     val listTheoreticalY = listTheoreticalX
         .map { erlangDistributionGenerator.calculateTheoretical(n, mu, it) }
 
-    val randomValuesCount = 100000
+    val randomValuesCount = 1000
 
     val dataTheoretical = mapOf<String, List<*>>(
         "x" to listTheoreticalX,
@@ -155,13 +155,19 @@ private fun drawGraphs(n: Int, mu: Double) {
     /**
      * Метод моментов
      */
-    val lambda = dx / s02
+    val lambdaMoments = dx / s02
     println("По методу моментов разделим оценку математического ожидания на оценку дисперсии, получим")
-    println("mu` = $lambda")
+    println("mu` = $lambdaMoments")
     /**
      * ~~~~~~~~~~~~~~~~~~~~~~Интервальные оценки~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
-    //todo Доверительные интервалы, страница 28
+    //стъюдент до 1000 http://old.exponenta.ru/educat/referat/XIkonkurs/student5/tabt-st.pdf
+    //для 99 это 2.6264055
+    // для 999 это 2.5807596
+    val left = dx - (s02 * 2.5807596)/ sqrt(randomValuesCount - 1.0)
+    val right = dx + (s02 * 2.5807596)/ sqrt(randomValuesCount - 1.0)
+    println("Доверительный интервал для математического ожидания при выборке размером 1000 и уровне значимости 0.99: \n" +
+            "$left <= $mx <= $right")
 
     /**
      * ~~~~~~~~~~~~~~~~~~~~~~Соответствие закона распределения распределению Эрланга~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -186,6 +192,8 @@ private fun drawGraphs(n: Int, mu: Double) {
 
     val plotWeird = (pWeird +
             geomLine { y = "y" }).show()
+    //calculatedDensity = значения, которые осталось сравнить с теоретическим
+
     var biggestViolation = 0 to 0.0
     calculatedDensity.forEachIndexed { index, d ->
         if (d != 0.0) {
@@ -195,10 +203,24 @@ private fun drawGraphs(n: Int, mu: Double) {
             }
         }
     }
+    //выведем самое большое несовпадение
     println("biggest violation index = ${biggestViolation.first} diff = ${biggestViolation.second}")
     println("теоретическое значение в этом индексе x = ${listTheoreticalX[biggestViolation.first]} y = ${listTheoreticalY[biggestViolation.first]}")
     println("экспериментальное значение после округлений = ${calculatedDensity[biggestViolation.first]}")
-
+    //теперь посчитаем полный хи квадат
+    var sum = 0.0
+    var M = 0
+    calculatedDensity.forEachIndexed { index, d ->
+        if (d != 0.0 && listTheoreticalY[index] != 0.0) {
+            sum += (listTheoreticalY[index] - d).pow(2) / listTheoreticalY[index]
+            M+=1
+        }
+    }
+    val xi2 = sum *randomValuesCount
+    //todo критерий кси квадрат, страница 19
+    //todo как определить число степеней свободы?
+    println("sum = $sum")
+    println("xi2 = $xi2")
 }
 
 fun List<Double>.closestIndex(value: Double): Int {
