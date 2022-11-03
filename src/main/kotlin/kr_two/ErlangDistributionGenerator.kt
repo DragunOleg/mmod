@@ -87,7 +87,7 @@ private fun drawGraphs(n: Int, mu: Double) {
     val listTheoreticalY = listTheoreticalX
         .map { erlangDistributionGenerator.calculateTheoretical(n, mu, it) }
 
-    val randomValuesCount = 1000
+    val randomValuesCount = 100000
 
     val dataTheoretical = mapOf<String, List<*>>(
         "x" to listTheoreticalX,
@@ -132,6 +132,7 @@ private fun drawGraphs(n: Int, mu: Double) {
         .show()
 
     /**
+     * Все оценки посчитаны по твимс 2 часть 2012: https://www.bsuir.by/m/12_100229_1_90172.pdf
      * ~~~~~~~~~~~~~~~~~~~~~~Точечные оценки~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
     val mx = n / mu
@@ -139,18 +140,18 @@ private fun drawGraphs(n: Int, mu: Double) {
     val dx = data["x"]!!.average()
     println("Несмещенная состоятельная оценка математического ожидания или выборочное среднее= $dx")
     val s02 = 1.0 / (randomValuesCount - 1) * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(2) }
-    println("Несмещенная состоятельная оценка дисперсии =  $s02")
-    val s2 = 1.0/ randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(2) }
+    println("Несмещенная состоятельная оценка дисперсии s02 =  $s02")
+    val s2 = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(2) }
     println("Смещенная состоятельная оценка дисперсии = $s2")
     val s12 = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - mx).pow(2) }
-    println("Несмещенная состоятельная оценка дисперсии = $s12")
+    println("Несмещенная состоятельная оценка дисперсии s12 = $s12")
     val s0 = sqrt(s02)
     println("Состоятельная оценка среднеквадратичного отклонения = $s0")
     repeat(5) { k ->
-        val ak = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + element.pow(k+1) }
-        val muk = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(k+1) }
-        println("Выборочный началный момент ${k+1}-го порядка: $ak")
-        println("Выборочный центральный момент ${k+1}-го порядка: $muk")
+        val ak = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + element.pow(k + 1) }
+        val muk = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(k + 1) }
+        println("Выборочный началный момент ${k + 1}-го порядка: $ak")
+        println("Выборочный центральный момент ${k + 1}-го порядка: $muk")
     }
     /**
      * Метод моментов
@@ -164,10 +165,12 @@ private fun drawGraphs(n: Int, mu: Double) {
     //стъюдент до 1000 http://old.exponenta.ru/educat/referat/XIkonkurs/student5/tabt-st.pdf
     //для 99 это 2.6264055
     // для 999 это 2.5807596
-    val left = dx - (s02 * 2.5807596)/ sqrt(randomValuesCount - 1.0)
-    val right = dx + (s02 * 2.5807596)/ sqrt(randomValuesCount - 1.0)
-    println("Доверительный интервал для математического ожидания при выборке размером 1000 и уровне значимости 0.99: \n" +
-            "$left <= $mx <= $right")
+    val left = dx - (s02 * 2.5807596) / sqrt(randomValuesCount - 1.0)
+    val right = dx + (s02 * 2.5807596) / sqrt(randomValuesCount - 1.0)
+    println(
+        "Доверительный интервал для математического ожидания при выборке размером 1000 и уровне значимости 0.99: \n" +
+                "$left <= $mx <= $right"
+    )
 
     /**
      * ~~~~~~~~~~~~~~~~~~~~~~Соответствие закона распределения распределению Эрланга~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -175,6 +178,7 @@ private fun drawGraphs(n: Int, mu: Double) {
     //todo Критерий Колмогорова, страница 22
     val roundedDataX: List<Double> = (plot.data!!["x"] as List<Double>)
         //.map { it.roundToInt().toDouble() }
+        ////округляем до 1 знака после запятой, при округлении до 2 график выглядит плохо
         .map { BigDecimal(it).setScale(1, RoundingMode.HALF_EVEN).toDouble() } //округляем до 1 знака после запятой
     //Сюда будем сплюсовывать density при каждом совпадении
     val calculatedDensity = listTheoreticalY.map { 0.0 }.toMutableList()
@@ -192,8 +196,8 @@ private fun drawGraphs(n: Int, mu: Double) {
 
     val plotWeird = (pWeird +
             geomLine { y = "y" }).show()
-    //calculatedDensity = значения, которые осталось сравнить с теоретическим
 
+    //выведем самое большое несовпадение
     var biggestViolation = 0 to 0.0
     calculatedDensity.forEachIndexed { index, d ->
         if (d != 0.0) {
@@ -203,23 +207,26 @@ private fun drawGraphs(n: Int, mu: Double) {
             }
         }
     }
-    //выведем самое большое несовпадение
     println("biggest violation index = ${biggestViolation.first} diff = ${biggestViolation.second}")
     println("теоретическое значение в этом индексе x = ${listTheoreticalX[biggestViolation.first]} y = ${listTheoreticalY[biggestViolation.first]}")
     println("экспериментальное значение после округлений = ${calculatedDensity[biggestViolation.first]}")
-    //теперь посчитаем полный хи квадат
+    //теперь посчитаем полный хи квадат. Нужно сравнить фактические calculatedDensity с теоретическими
     var sum = 0.0
+    var sumControl = 0.0
+
     var M = 0
     calculatedDensity.forEachIndexed { index, d ->
         if (d != 0.0 && listTheoreticalY[index] != 0.0) {
             sum += (listTheoreticalY[index] - d).pow(2) / listTheoreticalY[index]
-            M+=1
+            sumControl += listTheoreticalY[index]
+            M += 1
         }
     }
-    val xi2 = sum *randomValuesCount
+    val xi2 = sum * randomValuesCount
     //todo критерий кси квадрат, страница 19
     //todo как определить число степеней свободы?
     println("sum = $sum")
+    println("sumControl = $sumControl")
     println("xi2 = $xi2")
 }
 
