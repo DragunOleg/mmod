@@ -19,6 +19,8 @@ dependencies {
     implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.1.0")
     //testing weibull distribution
     implementation("org.apache.commons:commons-math3:3.6.1")
+    //need for connecting with Excel
+    implementation("org.apache.poi:poi:5.2.2")
 }
 
 tasks.test {

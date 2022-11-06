@@ -87,7 +87,7 @@ private fun drawGraphs(n: Int, mu: Double) {
     val listTheoreticalY = listTheoreticalX
         .map { erlangDistributionGenerator.calculateTheoretical(n, mu, it) }
 
-    val randomValuesCount = 100000
+    val randomValuesCount = 1000000
 
     val dataTheoretical = mapOf<String, List<*>>(
         "x" to listTheoreticalX,
@@ -179,13 +179,12 @@ private fun drawGraphs(n: Int, mu: Double) {
     val roundedDataX: List<Double> = (plot.data!!["x"] as List<Double>)
         //.map { it.roundToInt().toDouble() }
         ////округляем до 1 знака после запятой, при округлении до 2 график выглядит плохо
-        .map { BigDecimal(it).setScale(1, RoundingMode.HALF_EVEN).toDouble() } //округляем до 1 знака после запятой
+        .map { BigDecimal(it).setScale(1, RoundingMode.HALF_EVEN).toDouble() }
     //Сюда будем сплюсовывать density при каждом совпадении
     val calculatedDensity = listTheoreticalY.map { 0.0 }.toMutableList()
 
     roundedDataX.forEachIndexed { index, d ->
-        //умножаем на 10 для выравнивания с theoreticalY
-        calculatedDensity[listTheoreticalX.closestIndex(d)] += 1.0 / randomValuesCount * 10.0
+        calculatedDensity[listTheoreticalX.closestIndex(d)] += 1.0 / randomValuesCount
     }
 
     val dataWeird = mapOf<String, List<*>>(
@@ -196,6 +195,12 @@ private fun drawGraphs(n: Int, mu: Double) {
 
     val plotWeird = (pWeird +
             geomLine { y = "y" }).show()
+
+    //теперь посчитаем полный хи квадат. Нужно сравнить фактические calculatedDensity с теоретическими
+    var sum = 0.0
+    var sumControl = 0.0
+    //выравниваем теоретический скейл с подсчитанным
+    val listTheoreticalYAligned = listTheoreticalY.map { it / 10 }
 
     //выведем самое большое несовпадение
     var biggestViolation = 0 to 0.0
@@ -208,17 +213,14 @@ private fun drawGraphs(n: Int, mu: Double) {
         }
     }
     println("biggest violation index = ${biggestViolation.first} diff = ${biggestViolation.second}")
-    println("теоретическое значение в этом индексе x = ${listTheoreticalX[biggestViolation.first]} y = ${listTheoreticalY[biggestViolation.first]}")
+    println("теоретическое значение в этом индексе x = ${listTheoreticalX[biggestViolation.first]} y = ${listTheoreticalYAligned[biggestViolation.first]}")
     println("экспериментальное значение после округлений = ${calculatedDensity[biggestViolation.first]}")
-    //теперь посчитаем полный хи квадат. Нужно сравнить фактические calculatedDensity с теоретическими
-    var sum = 0.0
-    var sumControl = 0.0
 
     var M = 0
     calculatedDensity.forEachIndexed { index, d ->
-        if (d != 0.0 && listTheoreticalY[index] != 0.0) {
-            sum += (listTheoreticalY[index] - d).pow(2) / listTheoreticalY[index]
-            sumControl += listTheoreticalY[index]
+        if (d != 0.0 && listTheoreticalYAligned[index] != 0.0) {
+            sum += (listTheoreticalYAligned[index] - d).pow(2) / listTheoreticalYAligned[index]
+            sumControl += listTheoreticalYAligned[index]
             M += 1
         }
     }
@@ -228,6 +230,9 @@ private fun drawGraphs(n: Int, mu: Double) {
     println("sum = $sum")
     println("sumControl = $sumControl")
     println("xi2 = $xi2")
+    val degreesOfFreedom = M - 1 - 2
+    println("degrees of freedom = $degreesOfFreedom")
+    CriticalChiSquareExcelFileGenerator().invoke(0.01,degreesOfFreedom, xi2)
 }
 
 fun List<Double>.closestIndex(value: Double): Int {
