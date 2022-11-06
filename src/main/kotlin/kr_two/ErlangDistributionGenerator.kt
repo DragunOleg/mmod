@@ -12,8 +12,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import kotlin.math.*
 
-//todo тесты класса
-//todo посчитать кси-квадрат https://wiki.loginom.ru/articles/chi-square-test.html
 fun main() {
     //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
     System.setProperty("org.apache.batik.warn_destination", "false")
@@ -26,7 +24,6 @@ fun main() {
     }
 
     drawGraphs(n, mu)
-    //invalidDataExample()
 }
 
 /**
@@ -175,9 +172,7 @@ private fun drawGraphs(n: Int, mu: Double) {
     /**
      * ~~~~~~~~~~~~~~~~~~~~~~Соответствие закона распределения распределению Эрланга~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
-    //todo Критерий Колмогорова, страница 22
     val roundedDataX: List<Double> = (plot.data!!["x"] as List<Double>)
-        //.map { it.roundToInt().toDouble() }
         ////округляем до 1 знака после запятой, при округлении до 2 график выглядит плохо
         .map { BigDecimal(it).setScale(1, RoundingMode.HALF_EVEN).toDouble() }
     //Сюда будем сплюсовывать density при каждом совпадении
@@ -187,14 +182,13 @@ private fun drawGraphs(n: Int, mu: Double) {
         calculatedDensity[listTheoreticalX.closestIndex(d)] += 1.0 / randomValuesCount
     }
 
-    val dataWeird = mapOf<String, List<*>>(
-        "x" to listTheoreticalX,
-        "y" to calculatedDensity
-    )
-    val pWeird = letsPlot(dataWeird) { x = "x"; y = "y" }
-
-    val plotWeird = (pWeird +
-            geomLine { y = "y" }).show()
+//    val dataWeird = mapOf<String, List<*>>(
+//        "x" to listTheoreticalX,
+//        "y" to calculatedDensity
+//    )
+//    val pWeird = letsPlot(dataWeird) { x = "x"; y = "y" }
+//    val plotWeird = (pWeird +
+//            geomLine { y = "y" }).show()
 
     //теперь посчитаем полный хи квадат. Нужно сравнить фактические calculatedDensity с теоретическими
     var sum = 0.0
@@ -225,10 +219,10 @@ private fun drawGraphs(n: Int, mu: Double) {
         }
     }
     val xi2 = sum * randomValuesCount
-    //todo критерий кси квадрат, страница 19
-    //todo как определить число степеней свободы?
-    println("sum = $sum")
-    println("sumControl = $sumControl")
+    val sumControlCalculated = abs (1 - sumControl)
+    println("После вычисления всех вероятностей pi проверим, выполняется ли контрольное соотношение: ${1-sumControl}")
+    println("mod (1- sumpi) = $sumControlCalculated")
+    println ("Это меньше 0.01?: ${sumControlCalculated <= 0.01}")
     println("xi2 = $xi2")
     val degreesOfFreedom = M - 1 - 2
     println("degrees of freedom = $degreesOfFreedom")
