@@ -12,6 +12,7 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
             SwingUtilities.invokeLater { IprOneInputGetter() }
         }
         val excelReportGenerator = ExcelReportGenerator()
+        val random2DValueGenerator = Random2DValueGenerator(isRealRandom = true, isDebug = false)
     }
     var button = JButton("Process")
     val label = JLabel("Задайте целочисленные значения")
@@ -88,8 +89,23 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
             val vectorAString = textFieldA.text.also { println("Vector A = $it") }
             val vectorBString = textFieldB.text.also { println("Vector B = $it") }
             val RVN = textFieldRVN.text.toInt().also { println("число случайных величин = $it") }
-            InputValidator.validateInput(n, m, matrixString, vectorAString, vectorBString)
-            val probMatrix = excelReportGenerator.generateProbabilityMatrix(n, m, matrixString)
+            val vectorA = vectorAString.trim().split(" ").map { it.toInt() }
+            val vectorB = vectorBString.trim().split(" ").map { it.toInt() }
+            InputValidator.validateInput(n, m, matrixString, vectorAString, vectorBString, RVN)
+            val probMatrix = excelReportGenerator.generateProbabilityMatrix(n, m, matrixString, vectorA, vectorB)
+            val listToAnalyze = random2DValueGenerator.invoke(
+                probMatrix = probMatrix,
+                vectorA = vectorA,
+                vectorB = vectorB,
+                RVN = RVN
+            )
+            val empiricalMatrix = excelReportGenerator.generateEmpiricalDistributionMatrix(
+                n = n,
+                m = m,
+                list = listToAnalyze,
+                vectorA = vectorA,
+                vectorB = vectorB
+            )
             ParamsSaver.saveIprOneParams(IprOneParams(
                 n = n,
                 m = m,
