@@ -22,8 +22,8 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
     val labelM = JLabel("m =")
     val textFieldM = JTextField(ParamsSaver.loadIprOneParams().m.toString(), 4)
 
-    val labelMatrix = JLabel("matrix =")
-    val textFieldMatrix = JTextField(ParamsSaver.loadIprOneParams().matrix, 30)
+    val labelMatrix = JLabel("Веса матрицы =")
+    val textFieldMatrix = JTextField(ParamsSaver.loadIprOneParams().matrix, 23)
 
     val labelA = JLabel("Значения вектора А =")
     var textFieldA = JTextField(ParamsSaver.loadIprOneParams().vectorAString, 20)

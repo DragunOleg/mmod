@@ -31,6 +31,11 @@ class ExcelReportGenerator {
                 }
             }
         }
+        //https://stackoverflow.com/questions/15625556/adding-and-subtracting-doubles-are-giving-strange-results
+        if (summ != 1.0) throw Exception("Сумма вероятностей не равна 1. Вводите степени двойки, чтобы такого точно не было")
+        repeat(n) {
+            sheet.setColumnWidth(it, 13*256)
+        }
         println("Сумма всех ячеек: $summ")
         FileOutputStream(PATH).use { fileOut ->
             workbook.write(fileOut)
