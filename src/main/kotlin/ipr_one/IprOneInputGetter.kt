@@ -14,15 +14,24 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
         val excelReportGenerator = ExcelReportGenerator()
     }
     var button = JButton("Process")
-    val label = JLabel("Задайте веса компонент вектора, кратные 16 с суммой 16 через пробел\n")
+    val label = JLabel("Задайте целочисленные значения")
 
-    val labelA = JLabel("Интервалы для вектора А:")
-    var textFieldA = JTextField(ParamsSaver.loadIprOneParams().vectorAString, 40)
+    val labelN = JLabel("n =")
+    val textFieldN = JTextField(ParamsSaver.loadIprOneParams().n.toString(), 4)
 
-    val labelB = JLabel("Интервалы для вектора B:")
-    var textFieldB = JTextField(ParamsSaver.loadIprOneParams().vectorBString, 40)
+    val labelM = JLabel("m =")
+    val textFieldM = JTextField(ParamsSaver.loadIprOneParams().m.toString(), 4)
 
-    val labelN = JLabel("Число случайных величин:")
+    val labelMatrix = JLabel("matrix =")
+    val textFieldMatrix = JTextField(ParamsSaver.loadIprOneParams().matrix, 30)
+
+    val labelA = JLabel("Значения вектора А =")
+    var textFieldA = JTextField(ParamsSaver.loadIprOneParams().vectorAString, 20)
+
+    val labelB = JLabel("Значения вектора B= ")
+    var textFieldB = JTextField(ParamsSaver.loadIprOneParams().vectorBString, 20)
+
+    val labelRVN = JLabel("Число случайных величин:")
     var textFieldRVN = JTextField(ParamsSaver.loadIprOneParams().RVN.toString(), 10)
 
     init {
@@ -30,71 +39,80 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
         defaultCloseOperation = EXIT_ON_CLOSE
         setLocationRelativeTo(null)
         isVisible = true
-        setSize(500, 200)
+        setSize(420, 200)
 
-        textFieldA.addKeyListener(object : KeyAdapter() {
-                override fun keyReleased(event: KeyEvent) {
-                    val content = textFieldA.text
-                    button.isEnabled = content != ""
-                }
-            })
-
-        textFieldB.addKeyListener(object : KeyAdapter() {
+        val keyListener = object : KeyAdapter() {
             override fun keyReleased(event: KeyEvent) {
-                val content = textFieldB.text
+                val content = textFieldA.text
                 button.isEnabled = content != ""
             }
-        })
+        }
 
-        //block non number for n
-        textFieldRVN.addKeyListener(object : KeyAdapter() {
+        val nonNumberBlocker = object : KeyAdapter() {
             override fun keyTyped(e: KeyEvent) {
                 val c = e.keyChar
-                if (!((c in '0'..'9') ||
-                            c.code == KeyEvent.VK_BACK_SPACE
+                if (!((c in '0'..'9')
+                            || c.code == KeyEvent.VK_BACK_SPACE
+                            || c.code == KeyEvent.VK_SPACE
                             || c.code == KeyEvent.VK_DELETE)) {
                     toolkit.beep()
                     e.consume()
                 }
             }
-        })
+        }
+
+
+        textFieldN.addKeyListener(keyListener)
+        textFieldM.addKeyListener(keyListener)
+        textFieldMatrix.addKeyListener(keyListener)
+        textFieldA.addKeyListener(keyListener)
+        textFieldB.addKeyListener(keyListener)
+        textFieldRVN.addKeyListener(keyListener)
+
+        //block non number
+        textFieldN.addKeyListener(nonNumberBlocker)
+        textFieldM.addKeyListener(nonNumberBlocker)
+        textFieldMatrix.addKeyListener(nonNumberBlocker)
+        textFieldA.addKeyListener(nonNumberBlocker)
+        textFieldB.addKeyListener(nonNumberBlocker)
+        textFieldRVN.addKeyListener(nonNumberBlocker)
 
         button.addActionListener {
             processButtonClick()
         }
 
         add(label)
+        add(labelN)
+        add(textFieldN)
+        add(labelM)
+        add(textFieldM)
+        add(labelMatrix)
+        add(textFieldMatrix)
         add(labelA)
         add(textFieldA)
         add(labelB)
         add(textFieldB)
-        add(labelN)
+        add(labelRVN)
         add(textFieldRVN)
         add(button)
     }
 
     private fun processButtonClick() {
         try {
-            val vectorA = InputValidator.validateString(textFieldA.text)
-            val n = vectorA.size.also { println("n = $it") }
-            val vectorB = InputValidator.validateString(textFieldB.text)
-            val m = vectorB.size.also { println("m = $it") }
+            val n = textFieldN.text.toInt().also { println("n = $it") }
+            val m = textFieldM.text.toInt().also { println("m = $it") }
+            val matrixString = textFieldMatrix.text.also { println("matrix string = $it") }
+            val vectorAString = textFieldA.text.also { println("Vector A = $it") }
+            val vectorBString = textFieldB.text.also { println("Vector B = $it") }
             val RVN = textFieldRVN.text.toInt().also { println("число случайных величин = $it") }
-            val probMatrix = excelReportGenerator.generateMatrix(vectorA, vectorB)
-            // TODO: генерить RVN двухмерных величин так, чтобы удобно было обрабатывать результаты
             ParamsSaver.saveIprOneParams(IprOneParams(
-                vectorAString = textFieldA.text,
-                vectorBString = textFieldB.text,
+                n = n,
+                m = m,
+                matrix = matrixString,
+                vectorAString = vectorAString,
+                vectorBString = vectorBString,
                 RVN = RVN
             ))
-            JOptionPane.showMessageDialog(
-                this@IprOneInputGetter,
-                """
-                    Результат процессинга:
-                    $vectorA
-                    $vectorB
-                    """.trimIndent()
-            )
         } catch (e:Exception) {
             JOptionPane.showMessageDialog(
                 this@IprOneInputGetter,
