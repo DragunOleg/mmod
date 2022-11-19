@@ -42,13 +42,6 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
         setSize(420, 200)
 
         val keyListener = object : KeyAdapter() {
-            override fun keyReleased(event: KeyEvent) {
-                val content = textFieldA.text
-                button.isEnabled = content != ""
-            }
-        }
-
-        val nonNumberBlocker = object : KeyAdapter() {
             override fun keyTyped(e: KeyEvent) {
                 val c = e.keyChar
                 if (!((c in '0'..'9')
@@ -60,22 +53,12 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
                 }
             }
         }
-
-
         textFieldN.addKeyListener(keyListener)
         textFieldM.addKeyListener(keyListener)
         textFieldMatrix.addKeyListener(keyListener)
         textFieldA.addKeyListener(keyListener)
         textFieldB.addKeyListener(keyListener)
         textFieldRVN.addKeyListener(keyListener)
-
-        //block non number
-        textFieldN.addKeyListener(nonNumberBlocker)
-        textFieldM.addKeyListener(nonNumberBlocker)
-        textFieldMatrix.addKeyListener(nonNumberBlocker)
-        textFieldA.addKeyListener(nonNumberBlocker)
-        textFieldB.addKeyListener(nonNumberBlocker)
-        textFieldRVN.addKeyListener(nonNumberBlocker)
 
         button.addActionListener {
             processButtonClick()
@@ -105,6 +88,8 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
             val vectorAString = textFieldA.text.also { println("Vector A = $it") }
             val vectorBString = textFieldB.text.also { println("Vector B = $it") }
             val RVN = textFieldRVN.text.toInt().also { println("число случайных величин = $it") }
+            InputValidator.validateInput(n, m, matrixString, vectorAString, vectorBString)
+            val probMatrix = excelReportGenerator.generateProbabilityMatrix(n, m, matrixString)
             ParamsSaver.saveIprOneParams(IprOneParams(
                 n = n,
                 m = m,

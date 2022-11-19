@@ -9,21 +9,29 @@ import java.io.FileOutputStream
 class ExcelReportGenerator {
     val workbook = HSSFWorkbook()
 
-    fun generateMatrix(vectorA: List<Double>, vectorB: List<Double>):Array<DoubleArray> {
-        val matrix = Array(vectorA.size) {row->
-            DoubleArray(vectorB.size) {column ->
-                vectorA[row] * vectorB[column]
+    fun generateProbabilityMatrix(n: Int, m: Int, matrixString: String): Array<DoubleArray> {
+        if (workbook.getSheetIndex(MATRIX_SHEET_NAME) != -1) {
+            workbook.removeSheetAt(workbook.getSheetIndex(MATRIX_SHEET_NAME))
+        }
+        val matrixWeights = matrixString.trim().split(" ").map { it.toInt() }
+        val matrixSum = matrixWeights.sum().also { println("Сумма весов матрицы: $it") }
+        val matrix = Array(m) { row ->
+            DoubleArray(n) { column ->
+                matrixWeights[row * n + column] / matrixSum.toDouble()
             }
         }
         val sheet = workbook.createSheet(MATRIX_SHEET_NAME)
-        repeat(vectorB.size) {rowIndex ->
+        var summ = 0.0
+        repeat(m) { rowIndex ->
             sheet.createRow(rowIndex).apply {
-                repeat(vectorA.size) {columnIndex ->
-                    createCell(columnIndex).setCellValue(matrix[columnIndex][rowIndex])
+                repeat(n) { columnIndex ->
+                    val value = matrix[rowIndex][columnIndex]
+                    summ += value
+                    createCell(columnIndex).setCellValue(value)
                 }
             }
-
         }
+        println("Сумма всех ячеек: $summ")
         FileOutputStream(PATH).use { fileOut ->
             workbook.write(fileOut)
             workbook.close()
