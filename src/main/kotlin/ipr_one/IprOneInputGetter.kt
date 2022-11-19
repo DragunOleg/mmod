@@ -106,6 +106,7 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
                 vectorA = vectorA,
                 vectorB = vectorB
             )
+            random2DValueGenerator.drawVectorsHist(listToAnalyze, empiricalMatrix, vectorA, vectorB)
             ParamsSaver.saveIprOneParams(IprOneParams(
                 n = n,
                 m = m,

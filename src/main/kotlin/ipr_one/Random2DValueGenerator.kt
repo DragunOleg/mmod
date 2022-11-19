@@ -1,6 +1,9 @@
 package ipr_one
 
 import kr_one.RandomEventGenerator
+import org.jetbrains.letsPlot.geom.geomHistogram
+import org.jetbrains.letsPlot.ggsize
+import org.jetbrains.letsPlot.letsPlot
 
 fun main() {
     //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
@@ -15,7 +18,7 @@ fun main() {
         vectorB = listOf(40, 50),
         RVN = 10
     )
-    println("size=" +result.size)
+    println("size=" + result.size)
 
 }
 
@@ -45,7 +48,7 @@ class Random2DValueGenerator(
             var randomNumber = randomEventGenerator.invoke(0.5).randomNumber
             var tempSumToCompare = 0.0
 
-            probMatrix.forEachIndexed outer@ { row, doubles ->
+            probMatrix.forEachIndexed { row, doubles ->
                 doubles.forEachIndexed { column, d ->
                     tempSumToCompare += d
                     if (randomNumber <= tempSumToCompare) {
@@ -77,4 +80,33 @@ class Random2DValueGenerator(
         val column: Int,
         val randomNumber: Double
     )
+
+    fun drawVectorsHist(list: List<Result>, probMatrix: Array<DoubleArray>,vectorA: List<Int>, vectorB: List<Int>,) {
+        val possibleEventSublist: MutableList<Triple<Int, Int, String>> = mutableListOf()
+        probMatrix.forEachIndexed { row, doubles ->
+            doubles.forEachIndexed { column, d ->
+                possibleEventSublist += Triple(row, column, "b$row=${vectorB[row]};a$column=${vectorA[column]}")
+            }
+        }
+        val resultCondList: MutableList<String> = mutableListOf()
+        val resultXList: MutableList<Double> = mutableListOf()
+
+        possibleEventSublist.forEach { possibleEvent ->
+            val resultXListIteration = list
+                .filter { it.row == possibleEvent.first && it.column == possibleEvent.second }
+                .map { it.randomNumber }
+            resultCondList += list
+                .filter { it.row == possibleEvent.first && it.column == possibleEvent.second }
+                .map { possibleEvent.third }
+            resultXList += resultXListIteration
+            println("event ${possibleEvent.third}: size = ${resultXListIteration.size}")
+        }
+
+        val data = mapOf<String, Any>(
+            "cond" to resultCondList,
+            "x" to resultXList
+        )
+        val p = letsPlot(data) {x = "x"; fill = "cond"} + ggsize(800, 500)
+        (p+ geomHistogram(binWidth = 0.05)).show()
+    }
 }

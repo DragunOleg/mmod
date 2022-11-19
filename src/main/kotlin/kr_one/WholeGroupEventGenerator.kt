@@ -127,5 +127,5 @@ private fun drawExample() {
     )
     val p = letsPlot(data) {x = "x"; fill = "cond"} + ggsize(800, 500)
 
-    (p+geomHistogram(binWidth = 0.01)).show()
+    (p+geomHistogram()).show()
 }
