@@ -1,8 +1,10 @@
 package ipr_one
 
 import kr_one.RandomEventGenerator
+import org.jetbrains.letsPlot.GGBunch
 import org.jetbrains.letsPlot.geom.geomHistogram
-import org.jetbrains.letsPlot.ggsize
+import org.jetbrains.letsPlot.intern.Plot
+import org.jetbrains.letsPlot.label.ggtitle
 import org.jetbrains.letsPlot.letsPlot
 
 fun main() {
@@ -81,7 +83,17 @@ class Random2DValueGenerator(
         val randomNumber: Double
     )
 
-    fun drawVectorsHist(list: List<Result>, probMatrix: Array<DoubleArray>,vectorA: List<Int>, vectorB: List<Int>,) {
+    fun drawVectorsHist(list: List<Result>, probMatrix: Array<DoubleArray>,vectorA: List<Int>, vectorB: List<Int>) {
+        val bunch = GGBunch().apply {
+            addPlot(groupsPlot(list, probMatrix, vectorA, vectorB), 0, 0, width = 500, height = 500)
+            addPlot(vectorAPlot(list),500, 0, width = 400, height = 500)
+            addPlot(vectorBPlot(list), 900, 0, width = 400, height = 500)
+            show()
+        }
+
+    }
+
+    private fun groupsPlot(list: List<Result>, probMatrix: Array<DoubleArray>,vectorA: List<Int>, vectorB: List<Int>) : Plot {
         val possibleEventSublist: MutableList<Triple<Int, Int, String>> = mutableListOf()
         probMatrix.forEachIndexed { row, doubles ->
             doubles.forEachIndexed { column, d ->
@@ -106,7 +118,23 @@ class Random2DValueGenerator(
             "cond" to resultCondList,
             "x" to resultXList
         )
-        val p = letsPlot(data) {x = "x"; fill = "cond"} + ggsize(800, 500)
-        (p+ geomHistogram(binWidth = 0.05)).show()
+        val p = letsPlot(data) {x = "x"; fill = "cond"}
+        return p+ geomHistogram(boundary = 0.0, binWidth = 0.05) + ggtitle("Группы соответствуют каждой ячейке матрицы")
+    }
+
+    private fun vectorAPlot(list: List<Result>): Plot {
+        val data = mapOf(
+            "a" to list.map { it.a }
+        )
+        val p = letsPlot(data) {x = "a"}
+        return p+ geomHistogram() + ggtitle("гистограмма А")
+    }
+
+    private fun vectorBPlot(list: List<Result>): Plot {
+        val data = mapOf(
+            "b" to list.map { it.b }
+        )
+        val p = letsPlot(data) {x = "b"}
+        return p+ geomHistogram() + ggtitle("гистограмма B")
     }
 }

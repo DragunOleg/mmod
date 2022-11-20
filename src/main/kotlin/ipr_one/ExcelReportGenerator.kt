@@ -26,7 +26,7 @@ class ExcelReportGenerator {
         vectorA: List<Int>,
         vectorB: List<Int>
     ): Array<DoubleArray> {
-        //for 2nd process
+        //for 2nd process button click
         repeat(workbook.numberOfSheets) {
             workbook.removeSheetAt(0)
         }
