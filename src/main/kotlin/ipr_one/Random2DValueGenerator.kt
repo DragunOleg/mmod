@@ -72,6 +72,7 @@ class Random2DValueGenerator(
                 }
             }
         }
+        println("Фактическое кол-во элементов в списке для анализа: ${result.size}")
         return result
     }
 
@@ -84,7 +85,7 @@ class Random2DValueGenerator(
     )
 
     fun drawVectorsHist(list: List<Result>, probMatrix: Array<DoubleArray>,vectorA: List<Int>, vectorB: List<Int>) {
-        val bunch = GGBunch().apply {
+        GGBunch().apply {
             addPlot(groupsPlot(list, probMatrix, vectorA, vectorB), 0, 0, width = 500, height = 500)
             addPlot(vectorAPlot(list),500, 0, width = 400, height = 500)
             addPlot(vectorBPlot(list), 900, 0, width = 400, height = 500)

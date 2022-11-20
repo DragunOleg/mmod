@@ -84,7 +84,7 @@ private fun drawGraphs(n: Int, mu: Double) {
     val listTheoreticalY = listTheoreticalX
         .map { erlangDistributionGenerator.calculateTheoretical(n, mu, it) }
 
-    val randomValuesCount = 1000000
+    val randomValuesCount = 1000
 
     val dataTheoretical = mapOf<String, List<*>>(
         "x" to listTheoreticalX,
@@ -147,7 +147,7 @@ private fun drawGraphs(n: Int, mu: Double) {
     repeat(5) { k ->
         val ak = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + element.pow(k + 1) }
         val muk = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(k + 1) }
-        println("Выборочный началный момент ${k + 1}-го порядка: $ak")
+        println("Выборочный начальный момент ${k + 1}-го порядка: $ak")
         println("Выборочный центральный момент ${k + 1}-го порядка: $muk")
     }
     /**

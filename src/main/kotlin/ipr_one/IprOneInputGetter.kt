@@ -107,6 +107,7 @@ class IprOneInputGetter : JFrame("VectorsGetter") {
                 vectorB = vectorB
             )
             random2DValueGenerator.drawVectorsHist(listToAnalyze, empiricalMatrix, vectorA, vectorB)
+            excelReportGenerator.generateEstimatesSheet(listToAnalyze, RVN)
             ParamsSaver.saveIprOneParams(IprOneParams(
                 n = n,
                 m = m,
