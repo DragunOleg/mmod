@@ -203,11 +203,13 @@ class ExcelReportGenerator {
         )
         reportList.add("Состоятельная оценка коэффициента корреляции rab" to rab.toString())
 
-        reportEstimates(reportList)
-        writeWorkbookToFile()
+        reportEstimates(reportList, RVN)
     }
 
-    private fun reportEstimates(list: List<Pair<String, String>>) {
+    private fun reportEstimates(
+        list: List<Pair<String, String>>,
+        RVN: Int
+    ) {
         val sheet = workbook.createSheet(ESTIMATES_SHEET_NAME)
 
 
@@ -215,11 +217,71 @@ class ExcelReportGenerator {
             println(pair.first + " " + pair.second)
             sheet.createRow(index).apply {
                 createCell(0).setCellValue(pair.first)
-                createCell(1).setCellValue(pair.second)
+                pair.second.toDoubleOrNull()?.let {
+                    createCell(1).setCellValue(it)
+                } ?: createCell(1).setCellValue(pair.second)
             }
         }
-        sheet.setColumnWidth(0, 56 * 256)
+        sheet.setColumnWidth(0, 60 * 256)
         sheet.setColumnWidth(1, 13 * 256)
+        sheet.setColumnWidth(3, 21 * 256)
+        sheet.setColumnWidth(4, 13 * 256)
+        sheet.setColumnWidth(5, 27 * 256)
+        sheet.setColumnWidth(6, 13 * 256)
+
+        sheet.getRow(0).apply {
+            createCell(3).setCellValue("RVN-1")
+            createCell(4).setCellValue(RVN - 1.0)
+        }
+        sheet.getRow(1).apply {
+            createCell(3).setCellValue("1-уровень значимости")
+            createCell(4).setCellValue(0.01)
+        }
+        sheet.getRow(2).apply {
+            createCell(3).setCellValue("t")
+            //СТЬЮДЕНТ.ОБР.2Х
+            createCell(4).cellFormula = "_xlfn.T.INV.2T(E2,E1)"
+        }
+        sheet.getRow(3).apply {
+            createCell(5).setCellValue("Доверительный интервал ma")
+        }
+        sheet.getRow(4).apply {
+            createCell(4).cellFormula = "B1-(B2*E3)/SQRT(E1)"
+            createCell(5).setCellValue("<=ma<=")
+            createCell(6).cellFormula = "B1+(B2*E3)/SQRT(E1)"
+
+        }
+
+        sheet.getRow(5).apply {
+            createCell(5).setCellValue("Доверительный интервал mb")
+        }
+        sheet.getRow(6).apply {
+            createCell(4).cellFormula = "B15-(B16*E3)/SQRT(E1)"
+            createCell(5).setCellValue("<=ma<=")
+            createCell(6).cellFormula = "B15+(B16*E3)/SQRT(E1)"
+
+        }
+
+    }
+
+    fun generateDataListSheet(list: List<Random2DValueGenerator.Result>) {
+        val sheet = workbook.createSheet(DATA_SHEET_NAME)
+        sheet.createRow(0).apply {
+            createCell(0).setCellValue("a")
+            createCell(1).setCellValue("b")
+            createCell(2).setCellValue("randomNumber")
+        }
+        list.forEachIndexed { index, result ->
+            sheet.createRow(index + 1).apply {
+                createCell(0).setCellValue(result.a.toDouble())
+                createCell(1).setCellValue(result.b.toDouble())
+                createCell(2).setCellValue(result.randomNumber)
+            }
+        }
+        sheet.setColumnWidth(0, 13 * 256)
+        sheet.setColumnWidth(1, 13 * 256)
+        sheet.setColumnWidth(2, 13 * 256)
+        writeWorkbookToFile()
     }
 
     private fun writeWorkbookToFile() {
@@ -236,5 +298,6 @@ class ExcelReportGenerator {
         private const val MATRIX_SHEET_NAME = "Матрица вероятностей"
         private const val EMPIRICAL_MATRIX_SHEET_NAME = "Эмпирическая матрица вероятностей"
         private const val ESTIMATES_SHEET_NAME = "Оценки"
+        private const val DATA_SHEET_NAME = "Данные"
     }
 }

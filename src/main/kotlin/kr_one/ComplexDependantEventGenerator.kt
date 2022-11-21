@@ -14,7 +14,6 @@ fun main() {
     //invalidDataExample()
 }
 
-// TODO: Tests
 class ComplexDependantEventGenerator(
     val isRealRandom: Boolean,
     val isDebug: Boolean
