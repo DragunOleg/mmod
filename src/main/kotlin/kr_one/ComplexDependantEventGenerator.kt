@@ -93,13 +93,6 @@ class ComplexDependantEventGenerator(
         return PBdependant_notA
     }
 
-    /**
-     * Для простоты понимания
-     * @param Pa деталь произведена на заводе 1
-     * @param Pb деталь произведена на заводе 2
-     * @param PBdependant_A или P(B/A) - деталь с завода 1 и она хорошая
-     * @param PBdependant_notA или P(B/!A) - деталь с завода 2 и она хорошая
-     */
     sealed class Result(
         val Pa: Double,
         val Pb: Double,
