@@ -180,26 +180,26 @@ class KrOne1InputGetter : JFrame("Кр 1, 1") {
                     linetype = "dashed"
                 ), index * 300, 0, 290, 190
             )
-            val data2 = mapOf<String, List<Double>>(
+            val data2 = mapOf<String, List<String>>(
                 "x" to list.map {
                     if (it.result) {
-                        0.0
+                        "A"
                     } else {
-                        1.0
+                        "!A"
                     }
-                }
+                }.sortedBy { it }
             )
-            val p2 = letsPlot(data2) { x = "x" } + ggtitle("0 = A; 1 = !A")
+            val p2 = letsPlot(data2) { x = "x";} + ggtitle("практический результат:")
             bunch.addPlot(
 
                 p2 + geomBar(),
                 index * 300, 200, 290, 190
             )
             val PaNInt = (Pa * n).toInt()
-            val data3 = mapOf<String, List<Double>>(
-                "x" to List(PaNInt) { 0.0 } + List(n-PaNInt) { 1.0 }
+            val data3 = mapOf<String, List<String>>(
+                "x" to (List(PaNInt) { "A" } + List(n-PaNInt) { "!A" }).sortedBy { it }
             )
-            val p3 = letsPlot(data3) { x = "x" } + ggtitle("Theoretical:")
+            val p3 = letsPlot(data3) { x = "x" } + ggtitle("теоретический результат:")
             bunch.addPlot(
 
                 p3 + geomBar(),
