@@ -1,24 +1,19 @@
 package kr_one
 
 import org.jetbrains.letsPlot.GGBunch
+import org.jetbrains.letsPlot.geom.geomBar
 import org.jetbrains.letsPlot.geom.geomPoint
 import org.jetbrains.letsPlot.intern.Plot
 import org.jetbrains.letsPlot.label.ggtitle
 import org.jetbrains.letsPlot.letsPlot
-
-fun main() {
-    //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
-    System.setProperty("org.apache.batik.warn_destination", "false")
-
-    drawExample()
-    //invalidDataExample()
-}
+import java.awt.FlowLayout
+import javax.swing.*
 
 class ComplexDependantEventGenerator(
     val isRealRandom: Boolean,
-    val isDebug: Boolean
+    val isDebug: Boolean,
+    val randomEventGenerator: RandomEventGenerator
 ) {
-    private val randomEventGenerator = RandomEventGenerator(isRealRandom = isRealRandom, isDebug = false)
 
     operator fun invoke(Pa: Double, Pb: Double, PBdependantA: Double): Result {
         val resultA = randomEventGenerator(Pa)
@@ -155,40 +150,160 @@ class ComplexDependantEventGenerator(
     }
 }
 
-private fun drawExample() {
-    val complexDependantEventGenerator = ComplexDependantEventGenerator(isRealRandom = true, isDebug = false)
-    //хороший пример для отчета
-//    val Pa = 0.6
-//    val Pb = 0.3
-//    val PBdependant_A = 0.5
+class KrOne3InputGetter : JFrame("Кр1, 3") {
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            SwingUtilities.invokeLater { KrOne3InputGetter() }
+        }
+    }
 
-    val Pa = 0.5
-    val Pb = 0.3
-    val PBdependant_A = 0.5
-    //тогда P(B) = P(A)*P(B/A) + P(!A)*P(B/!A)
-    //0.3 = 0.5*0.5 + (1-0.5)*x
-    //искомое = 0.1, тогда !A!B должно быть 0.9 от всех !A, или для десяти тысяч тысяч
-    //4500 и 500 для искомого
-    val resultList = List<ComplexDependantEventGenerator.Result>(10000) {
-        complexDependantEventGenerator.invoke(Pa, Pb, PBdependant_A)
-    }
-    println("Testing resultList with Pa = $Pa, Pb = $Pb, P(B/A) = $PBdependant_A, calc P(B/!A) = ${resultList.first().PBdependant_notA}")
+    private val button = JButton("Process")
+    private val label = JLabel("Задайте ")
 
-    val ABList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.AB>().apply {
-        println("AB size: $size")
+    private val labelN = JLabel("n =")
+    private val textFieldN = JTextField(KrOneParamsSaver.loadKrOneThreeParams().n.toString(), 5)
+
+    private val labelPa = JLabel("Pa =")
+    private val textFieldPa = JTextField(KrOneParamsSaver.loadKrOneThreeParams().Pa.toString(), 5)
+    private val labelPb = JLabel("Pb =")
+    private val textFieldPb = JTextField(KrOneParamsSaver.loadKrOneThreeParams().Pb.toString(), 5)
+    private val labelPBdependantA = JLabel("P(b/a) =")
+    private val textFieldPBdependantA = JTextField(KrOneParamsSaver.loadKrOneThreeParams().PBdependantA.toString(), 5)
+    private val cbRandom = JCheckBox("isRealRandom").apply {
+        isSelected = KrOneParamsSaver.loadKrOneThreeParams().realRandom
     }
-    val notA_BList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>().apply {
-        println("notA_B size: $size")
+    private val cbDebug = JCheckBox("debugLog").apply {
+        isSelected = KrOneParamsSaver.loadKrOneThreeParams().debug
     }
-    val A_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>().apply {
-        println("A_notB size: $size")
+    private val cbValues = JCheckBox("showValues").apply {
+        isSelected = KrOneParamsSaver.loadKrOneThreeParams().valuesDraw
     }
-    val notA_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>().apply {
-        println("notA_notB size: $size")
+
+    init {
+        layout = FlowLayout()
+        defaultCloseOperation = EXIT_ON_CLOSE
+        setLocationRelativeTo(null)
+        isVisible = true
+        setSize(295, 200)
+
+        button.addActionListener {
+            processButtonClick()
+        }
+
+        add(label)
+        add(labelPa)
+        add(textFieldPa)
+        add(labelPb)
+        add(textFieldPb)
+        add(labelPBdependantA)
+        add(textFieldPBdependantA)
+        add(labelN)
+        add(textFieldN)
+        add(cbRandom)
+        add(cbDebug)
+        add(cbValues)
+        add(button)
     }
-    val invalidDataList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().apply {
-        println("Invalid size: $size")
+
+    private fun processButtonClick() {
+        try {
+            val n = textFieldN.text.toInt()
+            val Pa = textFieldPa.text.toDouble()
+            val Pb = textFieldPb.text.toDouble()
+            val PBdependant_A = textFieldPBdependantA.text.toDouble()
+            val isRealRandom = cbRandom.isSelected
+            val isDebug = cbDebug.isSelected
+            val isValuesDraw = cbValues.isSelected
+
+            val randomEventGenerator = RandomEventGenerator(
+                isRealRandom = isRealRandom, isDebug = isDebug
+            )
+            val complexDependantEventGenerator = ComplexDependantEventGenerator(
+                isRealRandom = isRealRandom, isDebug = isDebug, randomEventGenerator = randomEventGenerator
+            )
+
+            drawGraphs(n, Pa, Pb, PBdependant_A, complexDependantEventGenerator, isValuesDraw)
+
+            KrOneParamsSaver.saveKrOneThreeParams(
+                KrOneThreeParams(
+                    Pa = Pa,
+                    Pb = Pb,
+                    PBdependantA = PBdependant_A,
+                    n = n,
+                    realRandom = isRealRandom,
+                    debug = isDebug,
+                    valuesDraw = isValuesDraw
+                )
+            )
+        } catch (e: Exception) {
+            JOptionPane.showMessageDialog(
+                this@KrOne3InputGetter, """
+                    Ошибка во время процессинга:
+                    ${e.message}
+                    """.trimIndent()
+            )
+        }
     }
+
+    private fun drawGraphs(
+        n: Int,
+        Pa: Double,
+        Pb: Double,
+        PBdependant_A: Double,
+        complexDependantEventGenerator: ComplexDependantEventGenerator,
+        valuesDraw: Boolean
+    ) {
+        //хороший пример для отчета
+        //    val Pa = 0.5
+        //    val Pb = 0.3
+        //    val PBdependant_A = 0.5
+        //тогда P(B) = P(A)*P(B/A) + P(!A)*P(B/!A)
+        //0.3 = 0.5*0.5 + (1-0.5)*x
+        //искомое = 0.1, тогда !A!B должно быть 0.9 от всех !A, или для десяти тысяч тысяч
+        //4500 и 500 для искомого
+        val resultList = List<ComplexDependantEventGenerator.Result>(n) {
+            complexDependantEventGenerator.invoke(Pa, Pb, PBdependant_A)
+        }
+        println("Testing resultList with n = $n, Pa = $Pa, Pb = $Pb, P(B/A) = $PBdependant_A, calc P(B/!A) = ${resultList.first().PBdependant_notA}")
+
+        val ABList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.AB>().apply {
+            println("AB size: $size")
+        }
+        val notA_BList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>().apply {
+            println("notA_B size: $size")
+        }
+        val A_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>().apply {
+            println("A_notB size: $size")
+        }
+        val notA_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>().apply {
+            println("notA_notB size: $size")
+        }
+        val invalidDataList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().apply {
+            println("Invalid size: $size")
+        }
+
+        val data =
+            mapOf<String, List<*>>("x" to ABList.map { "AB" } + notA_BList.map { "!AB" } + A_notBList.map { "A!B" } + notA_notBList.map { "!A!B" } + invalidDataList.map { "invalid" })
+        val p = letsPlot(data) { x = "x" } + ggtitle(
+            "Фактическое распределение при n = $n; Pa = $Pa, Pb = $Pb",
+            "P(B/A) = $PBdependant_A, calc P(B/!A) = ${resultList.first().PBdependant_notA}"
+        )
+        (p + geomBar()).show()
+        if (valuesDraw) {
+            drawValues(resultList)
+        }
+    }
+}
+
+private fun drawValues(
+    resultList: List<ComplexDependantEventGenerator.Result>
+) {
+    val ABList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.AB>()
+    val notA_BList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>()
+    val A_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>()
+    val notA_notBList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>()
+    val invalidDataList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>()
 
     GGBunch()
         .addPlot(
@@ -217,54 +332,4 @@ private fun plotList(list: List<ComplexDependantEventGenerator.Result>): Plot {
 
     val p = letsPlot(data) { x = "x1"; y = "x2" } + ggtitle(list.firstOrNull()?.graphTitle() + " : ${list.size}")
     return (p + geomPoint(shape = 4))
-}
-
-private fun invalidDataExample() {
-    val complexDependantEventGenerator = ComplexDependantEventGenerator(isRealRandom = true, isDebug = false)
-    var Pa = 0.5
-    var Pb = 0.25
-    var PBdependant_A = 0.5
-
-    val resultList = List<ComplexDependantEventGenerator.Result>(100000) {
-        complexDependantEventGenerator.invoke(
-            Pa,
-            Pb,
-            PBdependant_A
-        )
-    }
-    printResult(resultList)
-
-    println("Итерация по всем возможным Pa Pb P(B/A) с действительным рандомом")
-    val resultList2 = mutableListOf<ComplexDependantEventGenerator.Result>()
-    repeat(10) { times1 ->
-        Pa = 0.1 * times1
-        Pb = 0.0
-        repeat(10) { times2 ->
-            Pb = 0.1 * times2
-            PBdependant_A = 0.0
-            repeat(10) { times3 ->
-                PBdependant_A = 0.1 * times3
-                resultList2 += complexDependantEventGenerator.invoke(Pa, Pb, PBdependant_A)
-            }
-        }
-    }
-    printResult(resultList2)
-}
-
-private fun printResult(result: List<ComplexDependantEventGenerator.Result>) {
-    result.filterIsInstance<ComplexDependantEventGenerator.Result.AB>().apply {
-        println("AB size: $size")
-    }
-    result.filterIsInstance<ComplexDependantEventGenerator.Result.notA_B>().apply {
-        println("notA_B size: $size")
-    }
-    result.filterIsInstance<ComplexDependantEventGenerator.Result.A_notB>().apply {
-        println("A_notB size: $size")
-    }
-    result.filterIsInstance<ComplexDependantEventGenerator.Result.notA_notB>().apply {
-        println("notA_notB size: $size")
-    }
-    result.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().apply {
-        println("Invalid size: $size")
-    }
 }

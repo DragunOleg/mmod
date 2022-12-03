@@ -158,15 +158,15 @@ class KrOne2InputGetter : JFrame("Кр1, 2") {
         (p + geomBar()).show()
 
         if (valuesDraw) {
-            drawExample(n, Pa, Pb, resultList)
+            drawValues(n, Pa, Pb, resultList)
         }
 
     }
 }
 
 
-private fun drawExample(n: Int, Pa: Double, Pb: Double, resultList: List<ComplexEventGenerator.Result>) {
-    println("Testing resultList with Pa = $Pa, Pb = $Pb")
+private fun drawValues(n: Int, Pa: Double, Pb: Double, resultList: List<ComplexEventGenerator.Result>) {
+    println("Testing resultList with Pa = $Pa, Pb = $Pb, n = $n")
     val ABList = resultList.filterIsInstance<ComplexEventGenerator.Result.AB>()
     val notA_BList = resultList.filterIsInstance<ComplexEventGenerator.Result.notA_B>()
     val A_notBList = resultList.filterIsInstance<ComplexEventGenerator.Result.A_notB>()

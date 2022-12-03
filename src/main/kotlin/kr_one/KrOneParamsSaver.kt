@@ -52,6 +52,32 @@ object KrOneParamsSaver {
         }
     }
 
+    fun loadKrOneThreeParams(): KrOneThreeParams {
+        return prefNodeThree().run {
+            KrOneThreeParams(
+                Pa = getDouble(KrOneThreeParams.PA_KEY, 0.5),
+                Pb = getDouble(KrOneThreeParams.PB_KEY, 0.3),
+                PBdependantA = getDouble(KrOneThreeParams.PB_DEP_A_KEY, 0.5),
+                n = getInt(KrOneThreeParams.N_KEY, 10),
+                realRandom = getBoolean(KrOneThreeParams.RANDOM_KEY, true),
+                debug = getBoolean(KrOneThreeParams.DEBUG_KEY, false),
+                valuesDraw = getBoolean(KrOneThreeParams.VALUES_DRAW_KEY, true)
+            )
+        }
+    }
+
+    fun saveKrOneThreeParams(params: KrOneThreeParams) {
+        prefNodeThree().apply {
+            putDouble(KrOneThreeParams.PA_KEY, params.Pa)
+            putDouble(KrOneThreeParams.PB_KEY, params.Pb)
+            putDouble(KrOneThreeParams.PB_DEP_A_KEY, params.PBdependantA)
+            putInt(KrOneThreeParams.N_KEY, params.n)
+            putBoolean(KrOneThreeParams.RANDOM_KEY, params.realRandom)
+            putBoolean(KrOneThreeParams.DEBUG_KEY, params.debug)
+            putBoolean(KrOneThreeParams.VALUES_DRAW_KEY, params.valuesDraw)
+        }
+    }
+
 }
 
 data class KrOneOneParams(
@@ -79,6 +105,26 @@ data class KrOneTwoParams(
     companion object {
         const val PA_KEY = "Pa"
         const val PB_KEY = "Pb"
+        const val N_KEY = "n"
+        const val RANDOM_KEY = "realRandom"
+        const val DEBUG_KEY = "debug"
+        const val VALUES_DRAW_KEY = "drawValues"
+    }
+}
+
+data class KrOneThreeParams(
+    val Pa: Double,
+    val Pb: Double,
+    val PBdependantA: Double,
+    val n: Int,
+    val realRandom: Boolean,
+    val debug: Boolean,
+    val valuesDraw: Boolean
+) {
+    companion object {
+        const val PA_KEY = "Pa"
+        const val PB_KEY = "Pb"
+        const val PB_DEP_A_KEY = "Pb/a"
         const val N_KEY = "n"
         const val RANDOM_KEY = "realRandom"
         const val DEBUG_KEY = "debug"
