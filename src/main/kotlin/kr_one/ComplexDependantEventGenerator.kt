@@ -146,7 +146,7 @@ class ComplexDependantEventGenerator(
     }
 
     companion object {
-        const val INVALID_PBDEPENDANT_NOTA = 0.5
+        const val INVALID_PBDEPENDANT_NOTA = 10000.0
     }
 }
 
@@ -282,6 +282,8 @@ class KrOne3InputGetter : JFrame("Кр1, 3") {
         val invalidDataList = resultList.filterIsInstance<ComplexDependantEventGenerator.Result.InvalidData>().apply {
             println("Invalid size: $size")
         }
+        val bunch = GGBunch()
+
 
         val data =
             mapOf<String, List<*>>("x" to ABList.map { "AB" } + notA_BList.map { "!AB" } + A_notBList.map { "A!B" } + notA_notBList.map { "!A!B" } + invalidDataList.map { "invalid" })
@@ -289,7 +291,18 @@ class KrOne3InputGetter : JFrame("Кр1, 3") {
             "Фактическое распределение при n = $n; Pa = $Pa, Pb = $Pb",
             "P(B/A) = $PBdependant_A, calc P(B/!A) = ${resultList.first().PBdependant_notA}"
         )
-        (p + geomBar()).show()
+
+        val ABt = List((n*Pa*PBdependant_A).toInt()) {"AB"}
+        val A_notBt = List((n*Pa*(1.0-PBdependant_A)).toInt()) { "A!B"}
+        val notA_Bt = List((n * (1.0-Pa) * resultList.first().PBdependant_notA).toInt()) { "!AB"}
+        val notA_notBt = List((n * (1.0-Pa) * (1.0-resultList.first().PBdependant_notA)).toInt()) { "!A!B"}
+        val data2 =
+            mapOf<String, List<*>>("x" to ABt + notA_Bt + A_notBt + notA_notBt)
+        val p2 = letsPlot(data2) {x = "x"} + ggtitle ("Теоретическое", "")
+
+        bunch.addPlot(p+geomBar(), 0, 0, 590, 390)
+        bunch.addPlot(p2+geomBar(), 600, 0, 390, 390)
+        bunch.show()
         if (valuesDraw) {
             drawValues(resultList)
         }
