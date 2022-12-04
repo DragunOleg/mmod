@@ -151,12 +151,26 @@ class KrOne2InputGetter : JFrame("Кр1, 2") {
         val notA_notBList = resultList.filterIsInstance<ComplexEventGenerator.Result.notA_notB>().apply {
             println("notA_notB size = $size")
         }
+        val bunch = GGBunch()
+
         val data =
             mapOf<String, List<*>>("x" to ABList.map { "AB" } + notA_BList.map { "!AB" } + A_notBList.map { "A!B" } + notA_notBList.map { "!A!B" })
 
         val p = letsPlot(data) { x = "x" } + ggtitle("Фактическое распределение при n = $n; Pa = $Pa, Pb = $Pb")
-        (p + geomBar()).show()
 
+        val ABt = List((n * Pa * Pb).toInt()) { "AB"}
+        val notA_Bt = List((n * (1.0-Pa) * Pb).toInt()) { "!AB"}
+        val A_notBt = List((n * Pa * (1.0-Pb)).toInt()) { "A!B"}
+        val notA_notBt = List((n * (1.0-Pa) * (1.0-Pb)).toInt()) { "!A!B"}
+
+        val data2 =
+            mapOf<String, List<*>>("x" to ABt + notA_Bt + A_notBt + notA_notBt)
+        val p2 = letsPlot(data2) {x = "x"} + ggtitle ("Теоретическое")
+
+        bunch.addPlot(p+geomBar(), 0, 0, 390, 390)
+        bunch.addPlot(p2+geomBar(), 400, 0, 390, 390)
+
+        bunch.show()
         if (valuesDraw) {
             drawValues(n, Pa, Pb, resultList)
         }
