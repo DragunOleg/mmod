@@ -6,7 +6,6 @@ object KrOneParamsSaver {
     private fun prefNodeOne(): Preferences = Preferences.userRoot().node("KR_ONE_ONE")
     private fun prefNodeTwo(): Preferences = Preferences.userRoot().node("KR_ONE_TWO")
     private fun prefNodeThree(): Preferences = Preferences.userRoot().node("KR_ONE_THREE")
-    private fun prefNodeFour(): Preferences = Preferences.userRoot().node("KR_ONE_FOUR")
 
     fun loadKrOneOneParams(): KrOneOneParams {
         return prefNodeOne().run {

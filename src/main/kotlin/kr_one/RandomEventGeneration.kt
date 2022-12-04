@@ -65,6 +65,9 @@ class KrOne1InputGetter : JFrame("Кр 1, 1") {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
+            //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
+            System.setProperty("org.apache.batik.warn_destination", "false")
+
             SwingUtilities.invokeLater { KrOne1InputGetter() }
         }
 

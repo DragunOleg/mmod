@@ -8,23 +8,11 @@ import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.geom.geomVLine
 import org.jetbrains.letsPlot.label.ggtitle
 import org.jetbrains.letsPlot.letsPlot
+import java.awt.FlowLayout
 import java.math.BigDecimal
 import java.math.RoundingMode
+import javax.swing.*
 import kotlin.math.*
-
-fun main() {
-    //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
-    System.setProperty("org.apache.batik.warn_destination", "false")
-
-    val erlangDistributionGenerator = ErlangDistributionGenerator(isRealRandom = true, isDebug = true)
-    val n = 7
-    val mu = 2.0
-    repeat(3) {
-        erlangDistributionGenerator(n = n, mu = mu)
-    }
-
-    drawGraphs(n, mu)
-}
 
 /**
  * Получаем U1...Un случайных величин на интервале 0..1
@@ -75,16 +63,95 @@ class ErlangDistributionGenerator(
     }
 }
 
-private fun drawGraphs(n: Int, mu: Double) {
+class KrTwoInputGetter : JFrame("КР2") {
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            //remove annoying warning "Graphics2D from BufferedImage lacks BUFFERED_IMAGE hint", was actual for 1/2 PC
+            System.setProperty("org.apache.batik.warn_destination", "false")
 
-    val erlangDistributionGenerator = ErlangDistributionGenerator(isRealRandom = true, isDebug = false)
+            SwingUtilities.invokeLater { KrTwoInputGetter() }
+        }
+    }
+
+    private val button = JButton("Process")
+    private val label = JLabel("Задайте ")
+
+    private val labelN = JLabel("n =")
+    private val textFieldN = JTextField(KrTwoParamsSaver.loadKrTwoParams().n.toString(), 5)
+
+    private val labelMu = JLabel("mu =")
+    private val textFieldMu = JTextField(KrTwoParamsSaver.loadKrTwoParams().mu.toString(), 5)
+    private val labelRVN = JLabel("RVN =")
+    private val textFieldRVN = JTextField(KrTwoParamsSaver.loadKrTwoParams().RVN.toString(), 5)
+
+    private val cbRandom = JCheckBox("isRealRandom").apply {
+        isSelected = KrTwoParamsSaver.loadKrTwoParams().realRandom
+    }
+    private val cbDebug = JCheckBox("debugLog").apply {
+        isSelected = KrTwoParamsSaver.loadKrTwoParams().debug
+    }
+
+    init {
+        layout = FlowLayout()
+        defaultCloseOperation = EXIT_ON_CLOSE
+        setLocationRelativeTo(null)
+        isVisible = true
+        setSize(295, 200)
+
+        button.addActionListener {
+            processButtonClick()
+        }
+
+        add(label)
+        add(labelN)
+        add(textFieldN)
+        add(labelMu)
+        add(textFieldMu)
+        add(labelRVN)
+        add(textFieldRVN)
+        add(cbRandom)
+        add(cbDebug)
+        add(button)
+    }
+
+    private fun processButtonClick() {
+        try {
+            val n = textFieldN.text.toInt()
+            val mu = textFieldMu.text.toDouble()
+            val RVN = textFieldRVN.text.toInt()
+            val isRealRandom = cbRandom.isSelected
+            val isDebug = cbDebug.isSelected
+
+            val erlangDistributionGenerator =
+                ErlangDistributionGenerator(isRealRandom = isRealRandom, isDebug = isDebug)
+
+            drawGraphs(n, mu, RVN, erlangDistributionGenerator)
+
+            KrTwoParamsSaver.saveKrTwoParams(
+                KrTwoParams(
+                    n, mu, RVN, isRealRandom, isDebug
+                )
+            )
+
+
+        } catch (e: Exception) {
+            JOptionPane.showMessageDialog(
+                this@KrTwoInputGetter, """
+                    Ошибка во время процессинга:
+                    ${e.message}
+                    """.trimIndent()
+            )
+        }
+    }
+}
+
+private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator: ErlangDistributionGenerator) {
 
     val theoreticalXFrequency = 0.01
     val listTheoreticalX = List(1500) { it * theoreticalXFrequency }
     val listTheoreticalY = listTheoreticalX
         .map { erlangDistributionGenerator.calculateTheoretical(n, mu, it) }
-
-    val randomValuesCount = 1000
 
     val dataTheoretical = mapOf<String, List<*>>(
         "x" to listTheoreticalX,
@@ -106,7 +173,7 @@ private fun drawGraphs(n: Int, mu: Double) {
             ))
 
     val data = mapOf<String, List<Double>>(
-        "x" to List(randomValuesCount) { erlangDistributionGenerator.invoke(n, mu) }
+        "x" to List(RVN) { erlangDistributionGenerator.invoke(n, mu) }
     )
 
     val p = letsPlot(data) { x = "x" }
@@ -116,7 +183,7 @@ private fun drawGraphs(n: Int, mu: Double) {
             geomDensity(linetype = 1, adjust = 0.1) +
             ggtitle(
                 "Фактическое распределение Эралнга",
-                "при n = $n; μ = $mu; размером = $randomValuesCount"
+                "при n = $n; μ = $mu; размером = $RVN"
             ) + geomVLine(xintercept = (data["x"] as List<Double>).average(), color = "red", linetype = "dashed"))
 
     GGBunch()
@@ -136,17 +203,17 @@ private fun drawGraphs(n: Int, mu: Double) {
     println("Мат.ожидание = $mx")
     val dx = data["x"]!!.average()
     println("Несмещенная состоятельная оценка математического ожидания или выборочное среднее= $dx")
-    val s02 = 1.0 / (randomValuesCount - 1) * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(2) }
+    val s02 = 1.0 / (RVN - 1) * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(2) }
     println("Несмещенная состоятельная оценка дисперсии s02 =  $s02")
-    val s2 = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(2) }
+    val s2 = 1.0 / RVN * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(2) }
     println("Смещенная состоятельная оценка дисперсии = $s2")
-    val s12 = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - mx).pow(2) }
+    val s12 = 1.0 / RVN * data["x"]!!.fold(0.0) { sum, element -> sum + (element - mx).pow(2) }
     println("Несмещенная состоятельная оценка дисперсии s12 = $s12")
     val s0 = sqrt(s02)
     println("Состоятельная оценка среднеквадратичного отклонения = $s0")
     repeat(5) { k ->
-        val ak = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + element.pow(k + 1) }
-        val muk = 1.0 / randomValuesCount * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(k + 1) }
+        val ak = 1.0 / RVN * data["x"]!!.fold(0.0) { sum, element -> sum + element.pow(k + 1) }
+        val muk = 1.0 / RVN * data["x"]!!.fold(0.0) { sum, element -> sum + (element - dx).pow(k + 1) }
         println("Выборочный начальный момент ${k + 1}-го порядка: $ak")
         println("Выборочный центральный момент ${k + 1}-го порядка: $muk")
     }
@@ -162,8 +229,8 @@ private fun drawGraphs(n: Int, mu: Double) {
     //стъюдент до 1000 http://old.exponenta.ru/educat/referat/XIkonkurs/student5/tabt-st.pdf
     //для 99 это 2.6264055
     // для 999 это 2.5807596
-    val left = dx - (s02 * 2.5807596) / sqrt(randomValuesCount - 1.0)
-    val right = dx + (s02 * 2.5807596) / sqrt(randomValuesCount - 1.0)
+    val left = dx - (s02 * 2.5807596) / sqrt(RVN - 1.0)
+    val right = dx + (s02 * 2.5807596) / sqrt(RVN - 1.0)
     println(
         "Доверительный интервал для математического ожидания при выборке размером 1000 и уровне значимости 0.99: \n" +
                 "$left <= $mx <= $right"
@@ -175,20 +242,21 @@ private fun drawGraphs(n: Int, mu: Double) {
     val roundedDataX: List<Double> = (plot.data!!["x"] as List<Double>)
         ////округляем до 1 знака после запятой, при округлении до 2 график выглядит плохо
         .map { BigDecimal(it).setScale(1, RoundingMode.HALF_EVEN).toDouble() }
+        //.map { it.toInt().toDouble() }
     //Сюда будем сплюсовывать density при каждом совпадении
     val calculatedDensity = listTheoreticalY.map { 0.0 }.toMutableList()
 
     roundedDataX.forEachIndexed { index, d ->
-        calculatedDensity[listTheoreticalX.closestIndex(d)] += 1.0 / randomValuesCount
+        calculatedDensity[listTheoreticalX.closestIndex(d)] += 1.0 / RVN
     }
 
-//    val dataWeird = mapOf<String, List<*>>(
-//        "x" to listTheoreticalX,
-//        "y" to calculatedDensity
-//    )
-//    val pWeird = letsPlot(dataWeird) { x = "x"; y = "y" }
-//    val plotWeird = (pWeird +
-//            geomLine { y = "y" }).show()
+    val dataWeird = mapOf<String, List<*>>(
+        "x" to listTheoreticalX,
+        "y" to calculatedDensity
+    )
+    val pWeird = letsPlot(dataWeird) { x = "x"; y = "y" }
+    val plotWeird = (pWeird +
+            geomLine { y = "y" }).show()
 
     //теперь посчитаем полный хи квадат. Нужно сравнить фактические calculatedDensity с теоретическими
     var sum = 0.0
@@ -218,15 +286,15 @@ private fun drawGraphs(n: Int, mu: Double) {
             M += 1
         }
     }
-    val xi2 = sum * randomValuesCount
-    val sumControlCalculated = abs (1 - sumControl)
-    println("После вычисления всех вероятностей pi проверим, выполняется ли контрольное соотношение: ${1-sumControl}")
+    val xi2 = sum * RVN
+    val sumControlCalculated = abs(1 - sumControl)
+    println("После вычисления всех вероятностей pi проверим, выполняется ли контрольное соотношение: ${1 - sumControl}")
     println("mod (1- sumpi) = $sumControlCalculated")
-    println ("Это меньше 0.01?: ${sumControlCalculated <= 0.01}")
+    println("Это меньше 0.01?: ${sumControlCalculated <= 0.01}")
     println("xi2 = $xi2")
     val degreesOfFreedom = M - 1 - 2
     println("degrees of freedom = $degreesOfFreedom")
-    CriticalChiSquareExcelFileGenerator().invoke(0.01,degreesOfFreedom, xi2)
+    CriticalChiSquareExcelFileGenerator().invoke(0.01, degreesOfFreedom, xi2)
 }
 
 fun List<Double>.closestIndex(value: Double): Int {
