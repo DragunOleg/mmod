@@ -148,8 +148,9 @@ class KrTwoInputGetter : JFrame("КР2") {
 
 private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator: ErlangDistributionGenerator) {
 
+    val listTheoreticalSize = 3000
     val theoreticalXFrequency = 0.01
-    val listTheoreticalX = List(1500) { it * theoreticalXFrequency }
+    val listTheoreticalX = List(listTheoreticalSize) { it * theoreticalXFrequency }
     val listTheoreticalY = listTheoreticalX
         .map { erlangDistributionGenerator.calculateTheoretical(n, mu, it) }
 
@@ -250,13 +251,13 @@ private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator
         calculatedDensity[listTheoreticalX.closestIndex(d)] += 1.0 / RVN
     }
 
-    val dataWeird = mapOf<String, List<*>>(
-        "x" to listTheoreticalX,
-        "y" to calculatedDensity
-    )
-    val pWeird = letsPlot(dataWeird) { x = "x"; y = "y" }
-    val plotWeird = (pWeird +
-            geomLine { y = "y" }).show()
+//    val dataWeird = mapOf<String, List<*>>(
+//        "x" to listTheoreticalX,
+//        "y" to calculatedDensity
+//    )
+//    val pWeird = letsPlot(dataWeird) { x = "x"; y = "y" }
+//    val plotWeird = (pWeird +
+//            geomLine { y = "y" }).show()
 
     //теперь посчитаем полный хи квадат. Нужно сравнить фактические calculatedDensity с теоретическими
     var sum = 0.0
@@ -286,7 +287,7 @@ private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator
             M += 1
         }
     }
-    val xi2 = sum * RVN
+    val xi2 = sum * M
     val sumControlCalculated = abs(1 - sumControl)
     println("После вычисления всех вероятностей pi проверим, выполняется ли контрольное соотношение: ${1 - sumControl}")
     println("mod (1- sumpi) = $sumControlCalculated")

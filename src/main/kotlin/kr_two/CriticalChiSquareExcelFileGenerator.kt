@@ -33,16 +33,18 @@ class CriticalChiSquareExcelFileGenerator {
             createCell(0).setCellValue("Подсчитанное хиКвадрат =")
             createCell(1).setCellValue(chiSqCalculated)
         }
-        FileOutputStream(PATH).use { fileOut ->
+
+        val path = String.format(PATH, System.currentTimeMillis().toString())
+        FileOutputStream(path).use { fileOut ->
             workbook.write(fileOut)
             workbook.close()
             fileOut.close()
         }
-        OSDetector.openWithSystem(File(PATH))
+        OSDetector.openWithSystem(File(path))
     }
 
     companion object {
-        private const val PATH = "src/main/kotlin/kr_two/JavaBooks.xls"
+        private const val PATH = "src/main/kotlin/kr_two/experiments/%s_JavaBooks.xls"
         private const val SHEET_NAME = "ChiSquareDistCalculator"
     }
 }
