@@ -148,8 +148,8 @@ class KrTwoInputGetter : JFrame("КР2") {
 
 private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator: ErlangDistributionGenerator) {
 
-    val listTheoreticalSize = 3000
-    val theoreticalXFrequency = 0.01
+    val listTheoreticalSize = 300
+    val theoreticalXFrequency = 0.1
     val listTheoreticalX = List(listTheoreticalSize) { it * theoreticalXFrequency }
     val listTheoreticalY = listTheoreticalX
         .map { erlangDistributionGenerator.calculateTheoretical(n, mu, it) }
@@ -195,6 +195,7 @@ private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator
             plotTheoretical, 600, 0, 500, 700
         )
         .show()
+    val nChi = RVN / 3
 
     /**
      * Все оценки посчитаны по твимс 2 часть 2012: https://www.bsuir.by/m/12_100229_1_90172.pdf
@@ -268,7 +269,7 @@ private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator
     //выведем самое большое несовпадение
     var biggestViolation = 0 to 0.0
     calculatedDensity.forEachIndexed { index, d ->
-        if (d != 0.0) {
+        if (d != 0.0 && index != 0) {
             val indexDiff = abs(d - listTheoreticalY[index])
             if (indexDiff >= biggestViolation.second) {
                 biggestViolation = index to indexDiff
@@ -281,13 +282,13 @@ private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator
 
     var M = 0
     calculatedDensity.forEachIndexed { index, d ->
-        if (d != 0.0 && listTheoreticalYAligned[index] != 0.0) {
+        if (d != 0.0 && listTheoreticalYAligned[index] != 0.0 && index != 0) {
             sum += (listTheoreticalYAligned[index] - d).pow(2) / listTheoreticalYAligned[index]
             sumControl += listTheoreticalYAligned[index]
             M += 1
         }
     }
-    val xi2 = sum * M
+    val xi2 = sum * nChi
     val sumControlCalculated = abs(1 - sumControl)
     println("После вычисления всех вероятностей pi проверим, выполняется ли контрольное соотношение: ${1 - sumControl}")
     println("mod (1- sumpi) = $sumControlCalculated")
@@ -295,7 +296,7 @@ private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator
     println("xi2 = $xi2")
     val degreesOfFreedom = M - 1 - 2
     println("degrees of freedom = $degreesOfFreedom")
-    CriticalChiSquareExcelFileGenerator().invoke(0.01, degreesOfFreedom, xi2)
+    CriticalChiSquareExcelFileGenerator().invoke(0.001, degreesOfFreedom, xi2)
 }
 
 fun List<Double>.closestIndex(value: Double): Int {
