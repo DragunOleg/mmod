@@ -8,12 +8,12 @@ object ParamsSaver {
     fun loadIprOneParams(): IprOneParams {
         return prefNode().run {
             IprOneParams(
-                n = getInt(IprOneParams.N_KEY, 3),
+                n = getInt(IprOneParams.N_KEY, 2),
                 m = getInt(IprOneParams.M_KEY, 2),
-                matrix = get(IprOneParams.MATRIX_KEY, "1 2 3 4 5 6"),
-                vectorAString = get(IprOneParams.VECTOR_A_KEY,"8 5 3"),
-                vectorBString = get(IprOneParams.VECTOR_B_KEY," 8 8"),
-                RVN = getInt(IprOneParams.RVN_KEY,1000)
+                matrix = get(IprOneParams.MATRIX_KEY, "1 2 3 4"),
+                vectorAString = get(IprOneParams.VECTOR_A_KEY,"1 2"),
+                vectorBString = get(IprOneParams.VECTOR_B_KEY," 3 4"),
+                RVN = getInt(IprOneParams.RVN_KEY,200)
             )
         }
     }

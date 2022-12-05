@@ -129,7 +129,13 @@ class ExcelReportGenerator {
         return empiricalMatrix
     }
 
-    fun generateEstimatesSheet(list: List<Random2DValueGenerator.Result>, RVN: Int) {
+    fun generateEstimatesSheet(
+        list: List<Random2DValueGenerator.Result>,
+        RVN: Int,
+        theoreticalMatrix: Array<DoubleArray>,
+        vectorA: List<Int>,
+        vectorB: List<Int>
+    ) {
         val reportList = mutableListOf<Pair<String, String>>()
 
         /**
@@ -186,6 +192,16 @@ class ExcelReportGenerator {
             }
             reportList.add("(B)Выборочный центральный момент ${k + 1}-го порядка:" to bmuk.toString())
         }
+        /**
+         *________________________Посчитаем ma и mb из теоретической таблицы_______________________
+         */
+        val mb = vectorB.foldIndexed(0.0) { index, sum, element ->
+            sum + (theoreticalMatrix[index].sum() * element)
+        }
+        val ma = vectorA.foldIndexed(0.0) { index, sum, element ->
+            sum + (theoreticalMatrix.map { it[index] }.sum() * element)
+        }
+
 
 
         /**
@@ -203,11 +219,13 @@ class ExcelReportGenerator {
         )
         reportList.add("Состоятельная оценка коэффициента корреляции rab" to rab.toString())
 
-        reportEstimates(reportList, RVN)
+        reportEstimates(reportList,ma, mb, RVN)
     }
 
     private fun reportEstimates(
         list: List<Pair<String, String>>,
+        ma: Double,
+        mb: Double,
         RVN: Int
     ) {
         val sheet = workbook.createSheet(ESTIMATES_SHEET_NAME)
@@ -259,9 +277,15 @@ class ExcelReportGenerator {
             createCell(4).cellFormula = "B15-(B16*E3)/SQRT(E1)"
             createCell(5).setCellValue("<=ma<=")
             createCell(6).cellFormula = "B15+(B16*E3)/SQRT(E1)"
-
         }
-
+        sheet.getRow(8).apply {
+            createCell(5).setCellValue("Теоретическое ma:")
+            createCell(6).setCellValue(ma)
+        }
+        sheet.getRow(9).apply {
+            createCell(5).setCellValue("Теоретическое mb:")
+            createCell(6).setCellValue(mb)
+        }
     }
 
     fun generateDataListSheet(list: List<Random2DValueGenerator.Result>) {
