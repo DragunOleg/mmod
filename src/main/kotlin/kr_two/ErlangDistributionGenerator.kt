@@ -195,7 +195,6 @@ private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator
             plotTheoretical, 600, 0, 500, 700
         )
         .show()
-    val nChi = RVN / 3
 
     /**
      * Все оценки посчитаны по твимс 2 часть 2012: https://www.bsuir.by/m/12_100229_1_90172.pdf
@@ -288,7 +287,7 @@ private fun drawGraphs(n: Int, mu: Double, RVN: Int, erlangDistributionGenerator
             M += 1
         }
     }
-    val xi2 = sum * nChi
+    val xi2 = sum * RVN
     val sumControlCalculated = abs(1 - sumControl)
     println("После вычисления всех вероятностей pi проверим, выполняется ли контрольное соотношение: ${1 - sumControl}")
     println("mod (1- sumpi) = $sumControlCalculated")
