@@ -5,7 +5,10 @@ import kotlin.test.assertEquals
 
 internal class ComplexDependantEventGeneratorTest {
 
-    private val complexDependantEventGenerator = ComplexDependantEventGenerator(isRealRandom = true, isDebug = false)
+    private val complexDependantEventGenerator = ComplexDependantEventGenerator(
+        isRealRandom = true,
+        isDebug = false,
+        randomEventGenerator =  RandomEventGenerator(isRealRandom = true, isDebug = false))
 
     @Test
     fun test0_5Distributions() {

@@ -159,7 +159,7 @@ class KrOne2InputGetter : JFrame("Кр1, 2") {
         val data =
             mapOf<String, List<*>>("x" to ABList.map { "AB" } + notA_BList.map { "!AB" } + A_notBList.map { "A!B" } + notA_notBList.map { "!A!B" })
 
-        val p = letsPlot(data) { x = "x" } + ggtitle("Фактическое распределение при n = $n; Pa = $Pa, Pb = $Pb")
+        val p = letsPlot(data) { x = "x" } + ggtitle("Фактическое распределение при", "n = $n; Pa = $Pa, Pb = $Pb")
 
         val ABt = List((n * Pa * Pb).toInt()) { "AB"}
         val notA_Bt = List((n * (1.0-Pa) * Pb).toInt()) { "!AB"}
@@ -168,7 +168,7 @@ class KrOne2InputGetter : JFrame("Кр1, 2") {
 
         val data2 =
             mapOf<String, List<*>>("x" to ABt + notA_Bt + A_notBt + notA_notBt)
-        val p2 = letsPlot(data2) {x = "x"} + ggtitle ("Теоретическое")
+        val p2 = letsPlot(data2) {x = "x"} + ggtitle ("Теоретическое","")
 
         bunch.addPlot(p+geomBar(), 0, 0, 390, 390)
         bunch.addPlot(p2+geomBar(), 400, 0, 390, 390)
