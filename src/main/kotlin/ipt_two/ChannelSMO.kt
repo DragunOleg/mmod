@@ -1,5 +1,6 @@
 package ipt_two
 
+import ipt_two.model.Request
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -7,6 +8,7 @@ import kotlinx.coroutines.launch
 import org.apache.commons.math3.distribution.ExponentialDistribution
 
 class ChannelSMO(
+    private val id: Int,
     muServiceFlow: Double,
     private val scope: CoroutineScope,
     val epochTime: Long,

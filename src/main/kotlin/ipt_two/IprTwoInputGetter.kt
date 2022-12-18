@@ -48,6 +48,7 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     var muServiceFlow: Double? = null
     var nuLeaving: Double? = null
 
+    var stateCollector: StateCollector? = null
 
     init {
         layout = FlowLayout()
@@ -90,13 +91,25 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
 
             launch {
                 val epochStartTime = System.currentTimeMillis()
-                val queueSMO = QueueSMO(capacityM = mQueue!!, epochTime = epochStartTime)
+                stateCollector = StateCollector(epochStartTime)
+                val queueSMO = QueueSMO(capacityM = mQueue!!, epochTime = epochStartTime, reportSizeChanged = { size ->
+                    println("queue size changed to $size")
+                    launch {
+                        stateCollector!!.stateChanged(newQueueSize = size, newBusyChannelsSize = null)
+                    }
+                })
                 val SMO = SMO(
                     queueSMO,
                     this,
                     muServiceFlow!!,
                     nChannels!!,
-                    epochStartTime
+                    epochStartTime,
+                    reportSizeChanged = { size ->
+                        println("SMO busy size changed to $size")
+                        launch {
+                            stateCollector!!.stateChanged(newQueueSize = null, newBusyChannelsSize = size)
+                        }
+                    }
                 )
                 launch {
                     RequestProducer(lambdaInputFlow!!, epochStartTime).requestsFlow().collect { request ->
@@ -121,6 +134,11 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     private fun stopButtonClicked() {
         try {
 
+            val finalStates = stateCollector?.getStateList()
+            ?.filter { it.stateTime != 0L }
+            println("finalStatesSize = ${finalStates?.size}")
+            // TODO: положить срезы на графики 
+            // TODO: подсчет теоретических/практических характеристик 
             IprTwoParamsSaver.saveIprTwoParams(
                 IprTwoParams(
                     channelsN = nChannels!!,
@@ -145,9 +163,6 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     private fun Job.setUpCancellation() {
         val processingJob = this
         val listener = ActionListener {
-            // TODO: собрать стейт системы 
-            // TODO: генерировать срез системы в дата класс на каждом изменении заявки с привязкой ко времени 
-            // TODO: положить срезы на графики 
             processingJob.cancel()
             stopButtonClicked()
         }

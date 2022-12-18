@@ -1,12 +1,14 @@
 package ipt_two
 
+import ipt_two.model.Request
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.html.currentTimeMillis
 
 class QueueSMO(
     val capacityM: Int,
-    val epochTime: Long
+    val epochTime: Long,
+    val reportSizeChanged: (Int) -> Unit
 ) {
     private val mutex = Mutex()
     private val queueList = mutableListOf<Request>()
@@ -16,9 +18,10 @@ class QueueSMO(
         var result: Request? = null
         modifyQueue {
             // TODO: проверка списка на уставшие заявки
-            result = this.firstOrNull()?.let {
+            result = this.firstOrNull()?.also {
                 it.queueWaitingTime = currentTimeMillis() - it.issueTime
                 this.removeFirst()
+                reportSizeChanged(this.size)
             }
         }
         return result
@@ -29,6 +32,7 @@ class QueueSMO(
             // TODO: проверка списка на уставшие заявки
             if (this.size < capacityM) {
                 this.add(request)
+                reportSizeChanged(this.size)
             } else {
                 request.isFaceFullQueue = true
                 leftList.add(request)
