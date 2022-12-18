@@ -47,7 +47,8 @@ data class Request(
     val i: Long,
     val deltaFromLastRequest: Long,
     val deltaFromEpoch: Long,
-    val issueTime: Long
+    val issueTime: Long,
+    var queueWaitingTime: Long = 0L
 )
 
 fun main() {

@@ -88,10 +88,26 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
             nuLeaving = textFieldLeavingNu.text.toDouble().also { println("ν параметр закона ухода = $it") }
 
 
-            launch(Dispatchers.Default) {
+            launch {
                 val epochStartTime = System.currentTimeMillis()
-                RequestProducer(lambdaInputFlow!!, epochStartTime).requestsFlow().collect { request ->
-                    println("collecting ${request.i}, deltaFromEpoch = ${request.deltaFromEpoch}, deltaFromLast = ${request.deltaFromLastRequest}")
+                val queueSMO = QueueSMO(capacityM = mQueue!!, epochTime = epochStartTime)
+                launch {
+                    RequestProducer(lambdaInputFlow!!, epochStartTime).requestsFlow().collect { request ->
+                        println("collecting ${request.i}, deltaFromEpoch = ${request.deltaFromEpoch}, deltaFromLast = ${request.deltaFromLastRequest}")
+                        queueSMO.addRequest(request)
+                    }
+                }
+                launch {
+                    val tempList = mutableListOf<Request>()
+                    while (true) {
+                        delay(200)
+                        val res = queueSMO.getRequest()
+                        res?.let {
+                            tempList.add(it)
+                            println("request waiting time = ${it.queueWaitingTime}")
+                            println("templistsize= ${tempList.size}")
+                        }
+                    }
                 }
             }.setUpCancellation()
 
