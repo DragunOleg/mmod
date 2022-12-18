@@ -1,10 +1,19 @@
 package ipt_two
 
+import kotlinx.coroutines.*
 import java.awt.FlowLayout
+import java.awt.event.ActionListener
 import java.lang.Exception
 import javax.swing.*
+import kotlin.coroutines.CoroutineContext
 
-class IprTwoInputGetter : JFrame("IPR2") {
+class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
+
+    val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
@@ -50,9 +59,7 @@ class IprTwoInputGetter : JFrame("IPR2") {
         startButton.addActionListener {
             startButtonClicked()
         }
-        stopButton.addActionListener {
-            stopButtonClicked()
-        }
+        stopButton.isEnabled = false
 
         add(labelChannelsN)
         add(textFieldChannelsN)
@@ -75,10 +82,19 @@ class IprTwoInputGetter : JFrame("IPR2") {
     private fun startButtonClicked() {
         try {
             nChannels = textFieldChannelsN.text.toInt().also { println("n каналов = $it") }
-            mQueue = textFieldQueueN.text.toInt().also { println("m место в очереди = $it") }
+            mQueue = textFieldQueueN.text.toInt().also { println("m мест в очереди = $it") }
             lambdaInputFlow = textFieldInputFlowLambda.text.toDouble().also { println("λ вход = $it") }
             muServiceFlow = textFieldServiceFlowMu.text.toDouble().also { println("μ обслуживания = $it") }
             nuLeaving = textFieldLeavingNu.text.toDouble().also { println("ν параметр закона ухода = $it") }
+
+
+            launch(Dispatchers.Default) {
+                val epochStartTime = System.currentTimeMillis()
+                RequestProducer(lambdaInputFlow!!, epochStartTime).requestsFlow().collect { request ->
+                    println("collecting ${request.i}, deltaFromEpoch = ${request.deltaFromEpoch}, deltaFromLast = ${request.deltaFromLastRequest}")
+                }
+            }.setUpCancellation()
+
 
         } catch (e: Exception) {
             JOptionPane.showMessageDialog(
@@ -96,12 +112,12 @@ class IprTwoInputGetter : JFrame("IPR2") {
 
             IprTwoParamsSaver.saveIprTwoParams(
                 IprTwoParams(
-                channelsN = nChannels!!,
-                queueM = mQueue!!,
-                inputFlowLambda = lambdaInputFlow!!,
-                serviceFlowMu = muServiceFlow!!,
-                leavingNu = nuLeaving!!
-            )
+                    channelsN = nChannels!!,
+                    queueM = mQueue!!,
+                    inputFlowLambda = lambdaInputFlow!!,
+                    serviceFlowMu = muServiceFlow!!,
+                    leavingNu = nuLeaving!!
+                )
             )
 
         } catch (e: Exception) {
@@ -112,6 +128,22 @@ class IprTwoInputGetter : JFrame("IPR2") {
                     ${e.message}
                     """.trimIndent()
             )
+        }
+    }
+
+    private fun Job.setUpCancellation() {
+        val processingJob = this
+        val listener = ActionListener {
+            processingJob.cancel()
+            stopButtonClicked()
+        }
+        stopButton.addActionListener(listener)
+        stopButton.isEnabled = true
+        // update the status and remove the listener after the loading job is completed
+        launch {
+            processingJob.join()
+            stopButton.removeActionListener(listener)
+            stopButton.isEnabled = false
         }
     }
 }

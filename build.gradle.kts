@@ -12,6 +12,7 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     testImplementation(kotlin("test"))
     //plotting libs
@@ -21,6 +22,13 @@ dependencies {
     implementation("org.apache.commons:commons-math3:3.6.1")
     //need for connecting with Excel
     implementation("org.apache.poi:poi:5.2.2")
+
+    val coroutinesVersion = "1.6.4"
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:$coroutinesVersion")
 }
 
 tasks.test {
