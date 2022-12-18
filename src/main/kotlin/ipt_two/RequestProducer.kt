@@ -18,16 +18,17 @@ class RequestProducer(
 
     fun requestsFlow(): Flow<Request> = flow {
         while(true) {
+            i++
             //через это кол-во миллисикунд мы добавляем заявку в поток
             var t = (distributionGenerator.sample() * MILLIS_IN_SECOND).toLong()
+            //при очень высокой интенсивности не позволяем времени быть нулями, чтобы не было одновременно выпущенных заявок
             if (t == 0L) {
                 t = 1
             }
             delay(t)
             val systemTime: Long = System.currentTimeMillis()
-            println("emiting $i")
-            emit(Request(i = i, deltaFromLastRequest = t, deltaFromEpoch = systemTime - epochTime, issueTime = systemTime))
-            i++
+            println("emiting id $i")
+            emit(Request(id = i, deltaFromLastRequest = t, deltaFromEpoch = systemTime - epochTime, issueTime = systemTime))
         }
     }
 
@@ -44,11 +45,19 @@ class RequestProducer(
 //todo сделать генерацию критического времени ухода, по истечению которого заявка уходит из очереди
 //Это можно сделать тут, добавив к issueTime критическую дельту
 data class Request(
-    val i: Long,
+    val id: Long,
+    //дельта времени появления между заявками
     val deltaFromLastRequest: Long,
+    //прошло времени со старта системы до появления заявки
     val deltaFromEpoch: Long,
+    //время появления заявки
     val issueTime: Long,
-    var queueWaitingTime: Long = 0L
+    //сколько находилась в очереди до попадания в систему
+    var queueWaitingTime: Long = 0L,
+    //сколько находилась на обслуживании в системе
+    var serviceWaitingTime: Long = 0L,
+    //появилась при заполненной очереди и не пошла дальше
+    var isFaceFullQueue: Boolean = false
 )
 
 fun main() {

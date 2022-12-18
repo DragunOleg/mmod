@@ -30,7 +30,9 @@ class QueueSMO(
             if (this.size < capacityM) {
                 this.add(request)
             } else {
+                request.isFaceFullQueue = true
                 leftList.add(request)
+                println("leftQueue = ${leftList.size}")
             }
         }
     }
@@ -38,8 +40,6 @@ class QueueSMO(
     private suspend fun modifyQueue(block: MutableList<Request>.()-> Unit) {
         mutex.withLock {
             queueList.block()
-            currentTimeMillis()
-            println("queueSize: ${queueList.size} leftSize: ${leftList.size} fromEpoch = ${currentTimeMillis()-epochTime}")
         }
     }
 }

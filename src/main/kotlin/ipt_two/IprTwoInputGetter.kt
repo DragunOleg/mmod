@@ -33,10 +33,10 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     val labelQueueM = JLabel("m мест в очереди =")
     val textFieldQueueN = JTextField(IprTwoParamsSaver.loadIprTwoParams().queueM.toString(), 4)
 
-    val labelInputFlowLambda = JLabel("λ интенсивность входящего потока? =")
+    val labelInputFlowLambda = JLabel("λ интенсивность входящего потока =")
     val textFieldInputFlowLambda = JTextField(IprTwoParamsSaver.loadIprTwoParams().inputFlowLambda.toString(), 4)
 
-    val labelServiceFlowMu = JLabel("μ интенсивность потока обслуживания? =")
+    val labelServiceFlowMu = JLabel("μ интенсивность потока обслуживания =")
     val textFieldServiceFlowMu = JTextField(IprTwoParamsSaver.loadIprTwoParams().serviceFlowMu.toString(), 4)
 
     val labelLeavingNu = JLabel("ν параметр закона ухода =")
@@ -91,22 +91,17 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
             launch {
                 val epochStartTime = System.currentTimeMillis()
                 val queueSMO = QueueSMO(capacityM = mQueue!!, epochTime = epochStartTime)
+                val SMO = SMO(
+                    queueSMO,
+                    this,
+                    muServiceFlow!!,
+                    nChannels!!,
+                    epochStartTime
+                )
                 launch {
                     RequestProducer(lambdaInputFlow!!, epochStartTime).requestsFlow().collect { request ->
-                        println("collecting ${request.i}, deltaFromEpoch = ${request.deltaFromEpoch}, deltaFromLast = ${request.deltaFromLastRequest}")
+                        println("collecting ${request.id}, deltaFromEpoch = ${request.deltaFromEpoch}, deltaFromLast = ${request.deltaFromLastRequest}")
                         queueSMO.addRequest(request)
-                    }
-                }
-                launch {
-                    val tempList = mutableListOf<Request>()
-                    while (true) {
-                        delay(200)
-                        val res = queueSMO.getRequest()
-                        res?.let {
-                            tempList.add(it)
-                            println("request waiting time = ${it.queueWaitingTime}")
-                            println("templistsize= ${tempList.size}")
-                        }
                     }
                 }
             }.setUpCancellation()
@@ -150,6 +145,9 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     private fun Job.setUpCancellation() {
         val processingJob = this
         val listener = ActionListener {
+            // TODO: собрать стейт системы 
+            // TODO: генерировать срез системы в дата класс на каждом изменении заявки с привязкой ко времени 
+            // TODO: положить срезы на графики 
             processingJob.cancel()
             stopButtonClicked()
         }
