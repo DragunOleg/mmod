@@ -133,10 +133,7 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
 
     private fun stopButtonClicked() {
         try {
-
-            val finalStates = stateCollector?.getStateList()
-            ?.filter { it.stateTime != 0L }
-            println("finalStatesSize = ${finalStates?.size}")
+            StatisticsCalculator.calculate(this)
             // TODO: положить срезы на графики 
             // TODO: подсчет теоретических/практических характеристик 
             IprTwoParamsSaver.saveIprTwoParams(
