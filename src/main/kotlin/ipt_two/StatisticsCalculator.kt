@@ -14,9 +14,8 @@ object StatisticsCalculator {
 
         // TODO: ПРОБЛЕМА В ПОТОКЕ ОБСЛУЖИВАНИЯ. ОН НЕ РАВЕН ТОМУ, ЧТО ТЫ ДУМАЛ 
         println("~~~~~~~~~~~~~~~~~~~~~ТЕОРЕТИЧЕСКИЕ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        // в среднем непрерывно занятый канал будет выдавать у = λ/μ обслуженных заявок в единицу времени
         val y = lambda / mu
-        println("y = $y")
+        println("y нагрузка = $y")
         // Предельные вероятности состояний:
         var sump0 = 1.0
         for (i in 1..n) {
@@ -37,7 +36,7 @@ object StatisticsCalculator {
         //(формула 2.25)
         for (i in 1..M) {
             val pIndexed = (y.pow(n + i) / (n.ipow(i) * factorial(n))) * p0
-            pList.add(i, pIndexed)
+            pList.add(pIndexed)
         }
 
         pList.forEachIndexed { index, d ->
