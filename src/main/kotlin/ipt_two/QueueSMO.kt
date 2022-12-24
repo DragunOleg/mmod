@@ -8,7 +8,7 @@ import kotlinx.html.currentTimeMillis
 class QueueSMO(
     val capacityM: Int,
     val epochTime: Long,
-    val reportSizeChanged: (Int) -> Unit
+    val reportSizeChanged: (queueSize: Int, leftSize: Int) -> Unit
 ) {
     private val mutex = Mutex()
     private val queueList = mutableListOf<Request>()
@@ -23,7 +23,7 @@ class QueueSMO(
             result = this.firstOrNull()?.also {
                 it.queueWaitingTime = currentTimeMillis() - it.issueTime
                 this.removeFirst()
-                reportSizeChanged(this.size)
+                reportSizeChanged(this.size, leftSize())
             }
         }
         return result
@@ -34,10 +34,11 @@ class QueueSMO(
             // TODO: проверка списка на уставшие заявки
             if (this.size < capacityM) {
                 this.add(request)
-                reportSizeChanged(this.size)
+                reportSizeChanged(this.size, leftSize())
             } else {
                 request.isFaceFullQueue = true
                 leftList.add(request)
+                reportSizeChanged(this.size, leftSize())
                 println("leftQueue = ${leftList.size}")
             }
         }

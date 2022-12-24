@@ -52,6 +52,7 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     lateinit var smo: SMO
     lateinit var queueSMO: QueueSMO
     lateinit var requestProducer: RequestProducer
+    var epochStartTime: Long = 0L
 
     fun getLeftQueueSize() = queueSMO.leftSize()
     fun getRequestProducedSize() = requestProducer.getRequestProducedSize()
@@ -97,24 +98,37 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
 
 
             launch {
-                val epochStartTime = System.currentTimeMillis()
+                epochStartTime = System.currentTimeMillis()
                 stateCollector = StateCollector(epochStartTime)
-                queueSMO = QueueSMO(capacityM = mQueue!!, epochTime = epochStartTime, reportSizeChanged = { size ->
-                    println("queue size changed to $size")
-                    launch(Dispatchers.Main) {
-                        stateCollector.stateChanged(newQueueSize = size, newBusyChannelsSize = null)
-                    }
-                })
+                queueSMO = QueueSMO(
+                    capacityM = mQueue!!,
+                    epochTime = epochStartTime,
+                    reportSizeChanged = { queueSize, leftSize ->
+                        println("queue size changed to $queueSize")
+                        launch(Dispatchers.Main) {
+                            stateCollector.stateChanged(
+                                newQueueSize = queueSize,
+                                newBusyChannelsSize = null,
+                                newQueueLeftSize = leftSize,
+                                newFinishedRequests = null
+                            )
+                        }
+                    })
                 smo = SMO(
                     queueSMO,
                     this,
                     muServiceFlow!!,
                     nChannels!!,
                     epochStartTime,
-                    reportSizeChanged = { size ->
-                        println("SMO busy size changed to $size")
+                    reportSizeChanged = { busyChannels: Int, allFinishedListSize: Int ->
+                        println("SMO busy size changed to $busyChannels")
                         launch(Dispatchers.Main) {
-                            stateCollector.stateChanged(newQueueSize = null, newBusyChannelsSize = size)
+                            stateCollector.stateChanged(
+                                newQueueSize = null,
+                                newBusyChannelsSize = busyChannels,
+                                newQueueLeftSize = null,
+                                newFinishedRequests = allFinishedListSize
+                            )
                         }
                     }
                 )

@@ -15,7 +15,7 @@ class SMO(
     nChannels: Int,
     private val epochTime: Long,
     //число занятых каналов поменялось
-    val reportSizeChanged: (Int) -> Unit
+    val reportSizeChanged: (busyChannels: Int, allFinishedListSize: Int) -> Unit
 ) {
     //список каналов обслуживания
     private val channels: List<ChannelSMO>
@@ -33,7 +33,7 @@ class SMO(
                 channels.firstOrNull { it.isAvailable }?.also { channelsSMO ->
                     queueSMO.getRequest()?.let { request ->
                         channelsSMO.putRequest(request)
-                        reportSizeChanged(channels.filter { !it.isAvailable }.size)
+                        reportSizeChanged(channels.filter { !it.isAvailable }.size, allFinishedList.size)
                     }
                 }
             }
@@ -45,7 +45,7 @@ class SMO(
             finishedRequests.receiveAsFlow().collect { request ->
                 println("request id ${request.id} finished service time: ${request.serviceWaitingTime}")
                 allFinishedList += request
-                reportSizeChanged(channels.filter { !it.isAvailable }.size)
+                reportSizeChanged(channels.filter { !it.isAvailable }.size, allFinishedList.size)
                 println("finishedListSize = ${allFinishedList.size}")
             }
         }

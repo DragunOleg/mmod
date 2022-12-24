@@ -8,5 +8,9 @@ data class State(
     //сколько времени провисело это состояние, прежде чем сменилось на новое
     var stateTime: Long,
     // systemtimemillis на момент перехода системы в это состояние
-    val stateTimeStamp: Long
+    val stateTimeStamp: Long,
+    //сколько уже ушло из очереди упершись в максимум
+    val queueLeftSize: Int,
+    //сколько уже обслужено
+    val finishedRequests: Int,
 )
