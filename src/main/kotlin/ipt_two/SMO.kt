@@ -28,7 +28,7 @@ class SMO(
         subscribeToFinished()
         coroutineScope.launch {
             while (true) {
-                delay(5)
+                delay(1)
                 channels.firstOrNull { it.isAvailable }?.also { channelsSMO ->
                     queueSMO.getRequest()?.let { request ->
                         channelsSMO.putRequest(request)

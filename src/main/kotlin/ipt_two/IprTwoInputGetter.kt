@@ -48,7 +48,12 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     var muServiceFlow: Double? = null
     var nuLeaving: Double? = null
 
-    var stateCollector: StateCollector? = null
+    lateinit var stateCollector: StateCollector
+    lateinit var queueSMO: QueueSMO
+    lateinit var requestProducer: RequestProducer
+
+    fun getLeftQueueSize() = queueSMO.leftSize()
+    fun getRequestProducedSize() = requestProducer.getRequestProducedSize()
 
     init {
         layout = FlowLayout()
@@ -92,10 +97,10 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
             launch {
                 val epochStartTime = System.currentTimeMillis()
                 stateCollector = StateCollector(epochStartTime)
-                val queueSMO = QueueSMO(capacityM = mQueue!!, epochTime = epochStartTime, reportSizeChanged = { size ->
+                queueSMO = QueueSMO(capacityM = mQueue!!, epochTime = epochStartTime, reportSizeChanged = { size ->
                     println("queue size changed to $size")
-                    launch {
-                        stateCollector!!.stateChanged(newQueueSize = size, newBusyChannelsSize = null)
+                    launch(Dispatchers.Main) {
+                        stateCollector.stateChanged(newQueueSize = size, newBusyChannelsSize = null)
                     }
                 })
                 val SMO = SMO(
@@ -106,16 +111,19 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
                     epochStartTime,
                     reportSizeChanged = { size ->
                         println("SMO busy size changed to $size")
-                        launch {
-                            stateCollector!!.stateChanged(newQueueSize = null, newBusyChannelsSize = size)
+                        launch(Dispatchers.Main) {
+                            stateCollector.stateChanged(newQueueSize = null, newBusyChannelsSize = size)
                         }
                     }
                 )
                 launch {
-                    RequestProducer(lambdaInputFlow!!, epochStartTime).requestsFlow().collect { request ->
+                    requestProducer = RequestProducer(lambdaInputFlow!!, epochStartTime)
+                    requestProducer.requestsFlow().collect { request ->
                         println("collecting ${request.id}, deltaFromEpoch = ${request.deltaFromEpoch}, deltaFromLast = ${request.deltaFromLastRequest}")
                         queueSMO.addRequest(request)
+
                     }
+
                 }
             }.setUpCancellation()
 

@@ -30,8 +30,8 @@ class ChannelSMO(
             delay(t)
             millisLoaded += t
             request.serviceWaitingTime = t
-            finishedRequests.send(request)
             isAvailable = true
+            finishedRequests.send(request)
         }
     }
 }

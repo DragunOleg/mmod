@@ -14,6 +14,8 @@ class QueueSMO(
     private val queueList = mutableListOf<Request>()
     private val leftList = mutableListOf<Request>()
 
+    fun leftSize() = leftList.size
+
     suspend fun getRequest(): Request? {
         var result: Request? = null
         modifyQueue {

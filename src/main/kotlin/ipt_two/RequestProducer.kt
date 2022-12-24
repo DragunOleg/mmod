@@ -17,6 +17,8 @@ class RequestProducer(
     private val distributionGenerator = ExponentialDistribution(1.0/lambdaInputFlow)
     private var i: Long = 0
 
+    fun getRequestProducedSize() = i + 1
+
     fun requestsFlow(): Flow<Request> = flow {
         while(true) {
             i++
@@ -45,7 +47,7 @@ class RequestProducer(
 
 fun main() {
     RequestProducer(
-        lambdaInputFlow = 1.0,
+        lambdaInputFlow = 100.0,
         epochTime = System.currentTimeMillis()
     ).testDistribution()
 }
