@@ -22,6 +22,7 @@ class SMO(
     //канал с завершенными заявками, все каналы обсуживания сбрасывают заявки сюда
     private val finishedRequests = Channel<Request>()
     private val allFinishedList = mutableListOf<Request>()
+    fun getAllFinishedList(): List<Request> = allFinishedList.toList()
 
     init {
         channels = List(nChannels) { ChannelSMO(id = it, muServiceFlow, coroutineScope, epochTime, finishedRequests) }

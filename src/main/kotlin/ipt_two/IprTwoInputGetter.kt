@@ -49,11 +49,13 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     var nuLeaving: Double? = null
 
     lateinit var stateCollector: StateCollector
+    lateinit var smo: SMO
     lateinit var queueSMO: QueueSMO
     lateinit var requestProducer: RequestProducer
 
     fun getLeftQueueSize() = queueSMO.leftSize()
     fun getRequestProducedSize() = requestProducer.getRequestProducedSize()
+    fun getAllFinishedList() = smo.getAllFinishedList()
 
     init {
         layout = FlowLayout()
@@ -103,7 +105,7 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
                         stateCollector.stateChanged(newQueueSize = size, newBusyChannelsSize = null)
                     }
                 })
-                val SMO = SMO(
+                smo = SMO(
                     queueSMO,
                     this,
                     muServiceFlow!!,

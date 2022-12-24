@@ -10,7 +10,7 @@ data class Request(
     val deltaFromEpoch: Long,
     //время появления заявки
     val issueTime: Long,
-    //сколько находилась в очереди до попадания в систему
+    //сколько находилась в очереди до попадания на обслуживание
     var queueWaitingTime: Long = 0L,
     //сколько находилась на обслуживании в системе
     var serviceWaitingTime: Long = 0L,

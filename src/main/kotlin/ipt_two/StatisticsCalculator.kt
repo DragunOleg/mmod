@@ -58,45 +58,46 @@ object StatisticsCalculator {
         println("Q относительная пропускная способность = $Q")
         //2.29
         val lambda_ = lambda * Q //среднее число заявок, которое сможет обслужить СМО в единицу времени
-        println("λ` абсолютная пропускная способность = $lambda_") //todo ПРАКТИЧЕСКОE среднее число заявок, обслуженное в единицу времени
+        println("λ` абсолютная пропускная способность = $lambda_")
         val kzan = lambda_ / mu
-        println("kzan среднее число занятых каналов = $kzan") //todo ПРАКТИЧЕСКОЕ  для каждого состояния из маппинга состояний
+        println("kzan среднее число занятых каналов = $kzan")
 
         val l = (y.pow(n + 1) / (n * factorial(n))) *
                 ((1 - ((y / n).pow(M)) * (M + 1 - (M / n) * y)) /
                         ((1 - y / n).pow(2))) *
                 p0
-        println("l среднее число заявок, находящихся в очереди = $l") //todo ПРАКТИЧЕСКОЕ  для каждого состояния из маппинга состояний
+        println("l среднее число заявок, находящихся в очереди = $l")
         val w = l / lambda
-        println("w среднее время ожидания в очереди = $w") //todo ПРАКТИЧЕСКОЕ
+        println("w среднее время ожидания в очереди = $w")
         val m = l + kzan
-        println("m среднее число заявок в СМО = $m") //todo ПРАКТИЧЕСКОЕ  для каждого состояния из маппинга состояний
+        println("m среднее число заявок в СМО = $m")
         val u = m / lambda
-        println("средне время пребывания заявки в СМО = $u") //todo ПРАКТИЧЕСКОЕ
+        println("среднеe время пребывания заявки в СМО = $u")
 
         println("~~~~~~~~~~~~~~~~~~~~~ПРАКТИЧЕСКИЕ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
+        val allFinishedList = getter.getAllFinishedList()
         val _potk2 = getter.getLeftQueueSize().toDouble() / getter.getRequestProducedSize()
-        var (invalidState, validStates) = getter.stateCollector.getStateList().toMutableList()
-            .partition { it.busyChannels< n && it.queueSize > 0 }
+        var (invalidStates, validStates) = getter.stateCollector.getStateList().toMutableList()
+            .partition { it.busyChannels < n && it.queueSize > 0 }
         val validStatesTime = validStates.sumOf { it.stateTime }.also { println("validStatesTime = $it") }
-        val invalidStatesTime = invalidState.sumOf { it.stateTime }.also { println("invalidStatesTime = $it") }
+        val invalidStatesTime = invalidStates.sumOf { it.stateTime }.also { println("invalidStatesTime = $it") }
         validStates = validStates.toMutableList()
         //добавляем процессинговое инвалидное время к нулевому состоянию
-        validStates.add(State(0,0,invalidStatesTime,0L))
+        validStates.add(State(0, 0, invalidStatesTime, 0L))
 
         val _pList = mutableListOf<Double>()
         for (i in 0..n) {
             validStates
                 .filter { it.queueSize == 0 && it.busyChannels == i }
-                .fold(0L) {sum, element -> sum + element.stateTime}
+                .fold(0L) { sum, element -> sum + element.stateTime }
                 .apply { _pList.add(this.toDouble() / (validStatesTime + invalidStatesTime)) }
         }
 
         for (i in 1..M) {
             validStates
                 .filter { it.queueSize == i && it.busyChannels == n }
-                .fold(0L) {sum, element -> sum + element.stateTime}
+                .fold(0L) { sum, element -> sum + element.stateTime }
                 .apply { _pList.add(this.toDouble() / (validStatesTime + invalidStatesTime)) }
         }
         _pList.forEachIndexed { index, d ->
@@ -108,5 +109,47 @@ object StatisticsCalculator {
         println("_p отказа = $_potk1")
         println("_p отказа (по ушедшим) = $_potk2")
 
+        var _kzan = 0.0
+        for (i in 0..n) {
+            _kzan += i *
+                    (validStates
+                        .filter { it.busyChannels == i }
+                        .sumOf { it.stateTime.toDouble() } /
+                            (validStatesTime + invalidStatesTime))
+        }
+        println("_kzan среднее число занятых каналов = $_kzan")
+
+        var _l = 0.0
+        for (i in 0..M) {
+            _l += i *
+                    (validStates
+                        .filter { it.queueSize == i }
+                        .sumOf { it.stateTime.toDouble() } /
+                            (validStatesTime + invalidStatesTime))
+        }
+        println("_l среднее число заявок, находящихся в очереди = $_l")
+
+        val _m = _l + _kzan
+        println("_m среднее число заявок в СМО = $_m")
+
+        //ПРАКТИЧЕСКОE среднее число заявок, обслуженное в единицу времени
+        val _lambda_ = allFinishedList.size / (validStatesTime + invalidStatesTime) * MILLIS_IN_SECOND
+        println("_λ` абсолютная пропускная способность = $_lambda_")
+
+
+        val _w = allFinishedList
+            .map { it.queueWaitingTime }
+            .average() / MILLIS_IN_SECOND
+        println("_w среднее время ожидания в очереди = $_w")
+
+        val _p = allFinishedList
+            .map { it.serviceWaitingTime }
+            .average() / MILLIS_IN_SECOND
+        println("_p среднее время обслуживания в канале = $_p")
+
+
+        val _u = _w + _p
+        println("среднеe время пребывания заявки в СМО = $_u")
+        // TODO: ГРАФИКИ 
     }
 }

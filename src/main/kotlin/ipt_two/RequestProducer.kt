@@ -15,13 +15,12 @@ class RequestProducer(
     val epochTime: Long
 ) {
     private val distributionGenerator = ExponentialDistribution(1.0/lambdaInputFlow)
-    private var i: Long = 0
+    private var i: Long = 1
 
-    fun getRequestProducedSize() = i + 1
+    fun getRequestProducedSize() = i
 
     fun requestsFlow(): Flow<Request> = flow {
         while(true) {
-            i++
             //через это кол-во миллисикунд мы добавляем заявку в поток
             var t = (distributionGenerator.sample() * MILLIS_IN_SECOND).toLong()
             //при очень высокой интенсивности не позволяем времени быть нулями, чтобы не было одновременно выпущенных заявок
@@ -32,6 +31,7 @@ class RequestProducer(
             val systemTime: Long = System.currentTimeMillis()
             println("emiting id $i")
             emit(Request(id = i, deltaFromLastRequest = t, deltaFromEpoch = systemTime - epochTime, issueTime = systemTime))
+            i++
         }
     }
 
