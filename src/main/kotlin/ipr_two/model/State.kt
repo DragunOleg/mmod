@@ -13,4 +13,6 @@ data class State(
     val queueLeftSize: Int,
     //сколько уже обслужено
     val finishedRequests: Int,
+    //сколько нетерпеливо ушло из очереди
+    val impatientLeftSize: Int
 )

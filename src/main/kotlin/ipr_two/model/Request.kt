@@ -1,7 +1,5 @@
 package ipr_two.model
 
-//todo сделать генерацию критического времени ухода, по истечению которого заявка уходит из очереди
-//Это можно сделать тут, добавив к issueTime критическую дельту
 data class Request(
     val id: Long,
     //дельта времени появления между заявками
@@ -10,6 +8,8 @@ data class Request(
     val deltaFromEpoch: Long,
     //время появления заявки
     val issueTime: Long,
+    //сколько времени готова простоять в очереди
+    val impatientQueueLeavingTime: Long,
     //сколько находилась в очереди до попадания на обслуживание
     var queueWaitingTime: Long = 0L,
     //сколько находилась на обслуживании в системе

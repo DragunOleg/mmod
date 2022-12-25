@@ -23,6 +23,7 @@ object StatisticsCalculator {
         val mu = getter.muServiceFlow!!
         val nu = getter.nuLeaving!!
 
+        // TODO: Переписать статистику с учетом ню 
         println("~~~~~~~~~~~~~~~~~~~~~ТЕОРЕТИЧЕСКИЕ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         val myY = lambda / mu
         println("y нагрузка = $myY")
@@ -198,6 +199,15 @@ object StatisticsCalculator {
                 geomLine { y = "y" } +
                 ggtitle("Покинули систему обслуженными"))
 
+        val dataImpationedFinishedRequests = mapOf<String, List<*>>(
+            "x" to validStates.map { (it.stateTimeStamp - epochStartTime).toDouble() / MILLIS_IN_SECOND },
+            "y" to validStates.map { it.impatientLeftSize }
+        )
+        val pDataImpationedFinishedRequests = letsPlot(dataImpationedFinishedRequests, mapping = { x = "x"; y = "y" })
+        val plotDataImpationedFinishedRequests = (pDataImpationedFinishedRequests +
+                geomLine { y = "y" } +
+                ggtitle("Покинули очередь, не дождавшись"))
+
         GGBunch()
             .addPlot(
                 plotDataQueue, 0, 0, 500, 200
@@ -211,9 +221,9 @@ object StatisticsCalculator {
             .addPlot(
                 plotDataFinishedRequests, 550, 250, 500, 200
             )
-//            .addPlot(
-//                plotDataFinishedRequests, 0, 500, 500, 200
-//            )
+            .addPlot(
+                plotDataImpationedFinishedRequests, 0, 500, 500, 200
+            )
             .show()
 
         /**

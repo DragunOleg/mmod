@@ -82,10 +82,6 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
         add(textFieldLeavingNu)
         add(startButton)
         add(stopButton)
-
-        // TODO: enable and calculate theoretical without issues 
-        labelLeavingNu.disable()
-        textFieldLeavingNu.disable()
     }
 
     private fun startButtonClicked() {
@@ -95,6 +91,9 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
             lambdaInputFlow = textFieldInputFlowLambda.text.toDouble().also { println("λ вход = $it") }
             muServiceFlow = textFieldServiceFlowMu.text.toDouble().also { println("μ обслуживания = $it") }
             nuLeaving = textFieldLeavingNu.text.toDouble().also { println("ν параметр закона ухода = $it") }
+            if (nuLeaving!! >= lambdaInputFlow!!) {
+                throw Exception("Невозможно корректно подсчитать теоретические значения! Задайте ν меньше λ")
+            }
 
 
             launch {
@@ -103,14 +102,15 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
                 queueSMO = QueueSMO(
                     capacityM = mQueue!!,
                     epochTime = epochStartTime,
-                    reportSizeChanged = { queueSize, leftSize ->
+                    reportSizeChanged = { queueSize, leftSize, impatientLeftSize->
                         println("queue size changed to $queueSize")
                         launch(Dispatchers.Main) {
                             stateCollector.stateChanged(
                                 newQueueSize = queueSize,
                                 newBusyChannelsSize = null,
                                 newQueueLeftSize = leftSize,
-                                newFinishedRequests = null
+                                newFinishedRequests = null,
+                                newImpatientLeftSize = impatientLeftSize
                             )
                         }
                     })
@@ -127,13 +127,14 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
                                 newQueueSize = null,
                                 newBusyChannelsSize = busyChannels,
                                 newQueueLeftSize = null,
-                                newFinishedRequests = allFinishedListSize
+                                newFinishedRequests = allFinishedListSize,
+                                newImpatientLeftSize = null
                             )
                         }
                     }
                 )
                 launch {
-                    requestProducer = RequestProducer(lambdaInputFlow!!, epochStartTime)
+                    requestProducer = RequestProducer(lambdaInputFlow!!,nuLeaving!!, epochStartTime)
                     requestProducer.requestsFlow().collect { request ->
                         println("collecting ${request.id}, deltaFromEpoch = ${request.deltaFromEpoch}, deltaFromLast = ${request.deltaFromLastRequest}")
                         queueSMO.addRequest(request)
@@ -158,8 +159,6 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     private fun stopButtonClicked() {
         try {
             StatisticsCalculator.calculate(this)
-            // TODO: положить срезы на графики 
-            // TODO: подсчет теоретических/практических характеристик 
             IprTwoParamsSaver.saveIprTwoParams(
                 IprTwoParams(
                     channelsN = nChannels!!,

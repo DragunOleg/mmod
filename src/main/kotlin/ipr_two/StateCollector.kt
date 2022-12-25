@@ -10,9 +10,9 @@ class StateCollector(
 ) {
     private val mutex = Mutex()
     private val stateList = mutableListOf<State>()
-    private var lastState: State = State(0, 0, 0L, epochTime, 0, 0)
+    private var lastState: State = State(0, 0, 0L, epochTime, 0, 0, 0)
 
-    suspend fun stateChanged(newQueueSize: Int?, newBusyChannelsSize: Int?, newQueueLeftSize: Int?, newFinishedRequests: Int?) {
+    suspend fun stateChanged(newQueueSize: Int?, newBusyChannelsSize: Int?, newQueueLeftSize: Int?, newFinishedRequests: Int?, newImpatientLeftSize: Int?) {
         mutex.withLock {
             val currentTime = currentTimeMillis()
             lastState.stateTime = currentTime - lastState.stateTimeStamp
@@ -23,7 +23,8 @@ class StateCollector(
                 stateTime = 0L,
                 stateTimeStamp = currentTime,
                 queueLeftSize = newQueueLeftSize ?: lastState.queueLeftSize,
-                finishedRequests = newFinishedRequests ?: lastState.finishedRequests
+                finishedRequests = newFinishedRequests ?: lastState.finishedRequests,
+                impatientLeftSize = newImpatientLeftSize ?: lastState.impatientLeftSize
             )
             lastState = newLastState
         }
