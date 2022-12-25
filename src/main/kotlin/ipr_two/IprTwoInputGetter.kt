@@ -1,4 +1,4 @@
-package ipt_two
+package ipr_two
 
 import kotlinx.coroutines.*
 import java.awt.FlowLayout

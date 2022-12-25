@@ -1,6 +1,6 @@
-package ipt_two
+package ipr_two
 
-import ipt_two.model.Request
+import ipr_two.model.Request
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

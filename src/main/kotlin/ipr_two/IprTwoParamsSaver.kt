@@ -1,4 +1,4 @@
-package ipt_two
+package ipr_two
 
 import java.util.prefs.Preferences
 

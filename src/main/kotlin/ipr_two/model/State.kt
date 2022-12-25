@@ -1,4 +1,4 @@
-package ipt_two.model
+package ipr_two.model
 
 data class State(
     //сколько сейчас в очереди

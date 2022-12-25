@@ -1,6 +1,6 @@
-package ipt_two
+package ipr_two
 
-import ipt_two.model.State
+import ipr_two.model.State
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.html.currentTimeMillis

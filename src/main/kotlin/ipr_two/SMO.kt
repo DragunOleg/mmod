@@ -1,6 +1,6 @@
-package ipt_two
+package ipr_two
 
-import ipt_two.model.Request
+import ipr_two.model.Request
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay

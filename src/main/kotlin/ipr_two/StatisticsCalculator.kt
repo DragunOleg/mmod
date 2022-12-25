@@ -1,12 +1,18 @@
-package ipt_two
+package ipr_two
 
-import ipt_two.model.State
 import jetbrains.datalore.base.math.ipow
+import kr_two.OSDetector
 import kr_two.factorial
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel.FillPatternType
+import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.ss.util.CellRangeAddress
 import org.jetbrains.letsPlot.GGBunch
 import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.label.ggtitle
 import org.jetbrains.letsPlot.letsPlot
+import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.pow
 
 object StatisticsCalculator {
@@ -77,7 +83,7 @@ object StatisticsCalculator {
         val m = l + kzan
         println("m среднее число заявок в СМО = $m")
         val u = m / lambda
-        println("среднеe время пребывания заявки в СМО = $u")
+        println("u среднеe время пребывания заявки в СМО = $u")
 
         println("~~~~~~~~~~~~~~~~~~~~~ПРАКТИЧЕСКИЕ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
@@ -151,6 +157,11 @@ object StatisticsCalculator {
 
         val _u = _w + _p
         println("среднеe время пребывания заявки в СМО = $_u")
+
+        /**
+         * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Графики~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         */
+
         val dataQueue = mapOf<String, List<*>>(
             "x" to validStates.map { (it.stateTimeStamp - epochStartTime).toDouble() / MILLIS_IN_SECOND },
             "y" to validStates.map { it.queueSize }
@@ -204,5 +215,121 @@ object StatisticsCalculator {
 //                plotDataFinishedRequests, 0, 500, 500, 200
 //            )
             .show()
+
+        /**
+         * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Excel~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         */
+        val workbook = HSSFWorkbook()
+        val sheet = workbook.createSheet(SHEET_NAME).apply {
+            setColumnWidth(0, 46 * 256)
+            setColumnWidth(1, 16 * 256)
+            setColumnWidth(2, 16 * 256)
+
+        }
+        val headerCellStyle = workbook.createCellStyle().apply {
+            fillForegroundColor = IndexedColors.LEMON_CHIFFON.getIndex()
+            fillPattern = FillPatternType.SOLID_FOREGROUND
+        }
+
+        sheet.createRow(0).apply {
+            createCell(0).setCellValue("n каналов =")
+            createCell(1).setCellValue(n.toDouble())
+        }
+        sheet.createRow(1).apply {
+            createCell(0).setCellValue("M мест в очереди =")
+            createCell(1).setCellValue(M.toDouble())
+        }
+        sheet.createRow(2).apply {
+            createCell(0).setCellValue("λ интенсивность входящего потока =")
+            createCell(1).setCellValue(lambda)
+        }
+        sheet.createRow(3).apply {
+            createCell(0).setCellValue("μ интенсивность потока обслуживания =")
+            createCell(1).setCellValue(mu)
+        }
+        sheet.createRow(4).apply {
+            createCell(0).setCellValue("ν параметр закона ухода(игнорируется в v1) =")
+            createCell(1).setCellValue(nu)
+        }
+
+        sheet.createRow(5).apply {
+            createCell(0).apply {
+                setCellValue("Параметры:")
+                setCellStyle(headerCellStyle)
+            }
+            createCell(1).apply {
+                setCellValue("Теоретическое:")
+                setCellStyle(headerCellStyle)
+            }
+            createCell(2).apply {
+                setCellValue("Практическое:")
+                setCellStyle(headerCellStyle)
+            }
+        }
+
+        sheet.createRow(6).apply {
+            createCell(0).setCellValue("P отказа =")
+            createCell(1).setCellValue(potk)
+            createCell(2).setCellValue(_potk1)
+            createCell(3).setCellValue(_potk2)
+        }
+        sheet.createRow(7).apply {
+            createCell(0).setCellValue("l среднее число заявок, находящихся в очереди =")
+            createCell(1).setCellValue(l)
+            createCell(2).setCellValue(_l)
+        }
+        sheet.createRow(8).apply {
+            createCell(0).setCellValue("kzan среднее число занятых каналов =")
+            createCell(1).setCellValue(kzan)
+            createCell(2).setCellValue(_kzan)
+        }
+        sheet.createRow(9).apply {
+            createCell(0).setCellValue("m среднее число заявок в СМО =")
+            createCell(1).setCellValue(m)
+            createCell(2).setCellValue(_m)
+        }
+        sheet.createRow(10).apply {
+            createCell(0).setCellValue("w среднее время ожидания в очереди =")
+            createCell(1).setCellValue(w)
+            createCell(2).setCellValue(_w)
+        }
+        sheet.createRow(11).apply {
+            createCell(0).setCellValue("u среднеe время пребывания заявки в СМО =")
+            createCell(1).setCellValue(u)
+            createCell(2).setCellValue(_u)
+        }
+        sheet.createRow(12).apply {
+            createCell(0).setCellValue("λ` абсолютная пропускная способность =")
+            createCell(1).setCellValue(lambda_)
+            createCell(2).setCellValue(_lambda_)
+        }
+        sheet.createRow(13).apply {
+            sheet.addMergedRegion(CellRangeAddress(13, 13, 0, 2))
+            createCell(0).apply {
+                setCellValue("финальные вероятности состояний")
+                setCellStyle(headerCellStyle)
+            }
+        }
+
+        pList.forEachIndexed { index, d ->
+            sheet.createRow(14 + index).apply {
+                createCell(0).setCellValue("p$index =")
+                createCell(1).setCellValue(d)
+                createCell(2).setCellValue(_pList[index])
+            }
+        }
+
+        val path = String.format(PATH, System.currentTimeMillis().toString())
+        FileOutputStream(path).use { fileOut ->
+            workbook.write(fileOut)
+            workbook.close()
+            fileOut.close()
+        }
+        OSDetector.openWithSystem(File(path))
     }
+
+
+    private const val PATH = "src/main/kotlin/ipr_two/reports/%s_JavaBooks.xls"
+    private const val SHEET_NAME = "SMO report"
+
 }
