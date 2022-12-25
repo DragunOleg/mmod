@@ -18,6 +18,7 @@ class QueueSMO(
 
     fun leftSize() = leftList.size
     fun leftImpatientSize() = impatientLeftList.size
+    fun getAllImpatient() = impatientLeftList.toList()
 
     suspend fun getRequest(): Request? {
         var result: Request? = null

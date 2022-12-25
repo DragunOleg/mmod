@@ -55,6 +55,7 @@ class IprTwoInputGetter : JFrame("IPR2"), CoroutineScope {
     var epochStartTime: Long = 0L
 
     fun getLeftQueueSize() = queueSMO.leftSize()
+    fun getAllImpatient() = queueSMO.getAllImpatient()
     fun getRequestProducedSize() = requestProducer.getRequestProducedSize()
     fun getAllFinishedList() = smo.getAllFinishedList()
 
