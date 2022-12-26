@@ -22,9 +22,7 @@ object StatisticsCalculator {
         val mu = getter.muServiceFlow!!
         val nu = getter.nuLeaving!!
         val nList = List(n) { it + 1 }
-        val nList0 = List(n+1) {it}
         val MList = List(M) { it + 1 }
-        val MList0 = List(M+1){it}
 
         println("~~~~~~~~~~~~~~~~~~~~~ТЕОРЕТИЧЕСКИЕ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         val myY = lambda / mu
@@ -171,7 +169,6 @@ object StatisticsCalculator {
             .map { it.serviceWaitingTime }
             .average() / MILLIS_IN_SECOND
         println("_p среднее время обслуживания в канале = $_p")
-
 
         val _u = _w + _p
         println("среднеe время пребывания заявки в СМО = $_u")
