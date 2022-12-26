@@ -25,7 +25,6 @@ object StatisticsCalculator {
         val nList = List(n) { it + 1 }
         val MList = List(M) { it + 1 }
 
-        // TODO: Переписать статистику с учетом ню 
         println("~~~~~~~~~~~~~~~~~~~~~ТЕОРЕТИЧЕСКИЕ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         val myY = lambda / mu
         val alphaObsl = nu / mu
