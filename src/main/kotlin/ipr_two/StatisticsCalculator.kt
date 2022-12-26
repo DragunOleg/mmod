@@ -1,6 +1,5 @@
 package ipr_two
 
-import jetbrains.datalore.base.math.ipow
 import kr_two.OSDetector
 import kr_two.factorial
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
@@ -23,33 +22,35 @@ object StatisticsCalculator {
         val mu = getter.muServiceFlow!!
         val nu = getter.nuLeaving!!
         val nList = List(n) { it + 1 }
+        val nList0 = List(n+1) {it}
         val MList = List(M) { it + 1 }
+        val MList0 = List(M+1){it}
 
         println("~~~~~~~~~~~~~~~~~~~~~ТЕОРЕТИЧЕСКИЕ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         val myY = lambda / mu
-        val alphaObsl = nu / mu
+        val alphaOj = nu / mu
         println("y нагрузка = $myY")
 
         //1.55
         val p0 = 1 /
                 (1 +
                         (nList.fold(0.0) { sum, i ->
-                            sum + (myY.pow(i) / (factorial(i) * (1 + alphaObsl).pow(i)))
+                            sum + (myY.pow(i) / factorial(i))
                         })
                         +
-                        (myY.pow(n) / (factorial(n) * (1 + alphaObsl).pow(n) * MList.fold(0.0) { sum, r ->
+                        (myY.pow(n) / (factorial(n) * MList.fold(0.0) { sum, r ->
                             val rList = List(r) { it + 1 }
                             //myY.pow(r)
                             sum + (myY.pow(r) /
                                     rList.fold(1.0) { mult, s ->
-                                        mult * (n * (1 + alphaObsl) + s * alphaObsl)
+                                        mult * (n + s * alphaOj)
                                     })
                         })))
 
         val pList = mutableListOf(p0)
         //1.56
         for (i in 1..n) {
-            val pIndexed = myY.pow(i) * p0 / (factorial(i) * ((1 + alphaObsl).pow(i)))
+            val pIndexed = myY.pow(i) * p0 / factorial(i)
             pList.add(pIndexed)
         }
 
@@ -57,8 +58,8 @@ object StatisticsCalculator {
         for (i in 1..M) {
             val rList = List(i) { it + 1 }
             val pIndexed = (myY.pow(n + i) * p0 /
-                    (factorial(i) * (1 + alphaObsl).pow(n) * rList.fold(1.0) { mult, s ->
-                        mult * (n * (1 + alphaObsl) + s * alphaObsl)
+                    (factorial(i) * rList.fold(1.0) { mult, s ->
+                        mult * (n + s * alphaOj)
                     }))
 
             pList.add(pIndexed)
@@ -163,8 +164,7 @@ object StatisticsCalculator {
         println("_λ` абсолютная пропускная способность = $_lambda_")
 
 
-        val _w = (allFinishedList.map { it.queueWaitingTime }.average() +
-                allImpatientList.map { it.impatientQueueLeavingTime }.average()) / MILLIS_IN_SECOND
+        val _w = allFinishedList.map { it.queueWaitingTime }.average() / MILLIS_IN_SECOND
         println("_w среднее время ожидания в очереди = $_w")
 
         val _p = allFinishedList
