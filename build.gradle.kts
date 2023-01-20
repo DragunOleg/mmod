@@ -22,6 +22,8 @@ dependencies {
     implementation("org.apache.commons:commons-math3:3.6.1")
     //need for connecting with Excel
     implementation("org.apache.poi:poi:5.2.2")
+    //https://stackoverflow.com/questions/47881821/error-statuslogger-log4j2-could-not-find-a-logging-implementation
+    implementation("org.apache.logging.log4j:log4j-to-slf4j:2.8.2")
 
     val coroutinesVersion = "1.6.4"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
